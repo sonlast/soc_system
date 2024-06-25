@@ -1,17 +1,11 @@
 import React, { Component } from 'react'
-import { Text, View, StyleSheet } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, Text, View } from 'react-native'
 
-export default class LoginScreen extends Component {
+export default class RegisterScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <LinearGradient
-          colors={['#4c669f', '#3b5998', '#192f6a']}
-          style={styles.background}
-          >
-        </LinearGradient>
-        <Text style={styles.text}> textInComponent </Text>
+        <Text> Log In here </Text>
       </View>
     )
   }
@@ -20,19 +14,8 @@ export default class LoginScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-  },
-  text: {
-    textAlign: 'center',
-    fontSize: 24,
-    color: '#333',
-  },
-  background: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    height: 300,
-  },
+  }
 });
