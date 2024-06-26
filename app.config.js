@@ -17,6 +17,7 @@ export default {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.example.SOC",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -32,6 +33,9 @@ export default {
       storageBucket: process.env.STORAGE_BUCKET,
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId:process.env.APP_ID,
+      "eas": {
+        "projectId": "cb962146-ee56-48aa-9ec2-15570246637f"
+      }
     }
 
   }
