@@ -31,3 +31,16 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+//? SAFE-on-Chat: A Messaging Application with Security Features using RSA and TwoFish Encryption Algorithm
+
+//! FEATURES
+//! Sending Attachments (other file types)
+//! No SQL
+//! Calls (Video/Audio)
+//! Chatroom
+//! Login / Registration Form
+//! Other Security Features 
+//! Can't Screenshot
+
+//* Modify Algorithm
