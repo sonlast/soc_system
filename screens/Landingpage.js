@@ -1,10 +1,10 @@
-import * as React from 'react'
-import { Image, Pressable, Text, View, StyleSheet } from 'react-native'
+import * as React from 'react';
+import { Image, Pressable, Text, View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
 
-const LoginScreen = () => {
+const Landingpage = () => {
   const navigation = useNavigation();
 
   const pressSignUp = () => {
@@ -53,7 +53,9 @@ const LoginScreen = () => {
         </Pressable>
         <View style={styles.groupedtext}>
           <Text style={styles.randomtext}>No Account?</Text>
-          <Text style={{color: '#0000ff', ...styles.randomtext}} onPress={pressSignUp}> Sign Up Here</Text>
+          <Text style={{ color: '#0000ff', ...styles.randomtext }} onPress={pressSignUp}> Sign Up Here</Text>
+          {/* Optional Styling */}
+          {/* <Text style={[{color: '#0000ff'}, styles.randomtext]} onPress={pressSignUp}> Sign Up Here</Text> */}
         </View>
       </LinearGradient>
     </View>
@@ -103,4 +105,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default LoginScreen;
+export default Landingpage;

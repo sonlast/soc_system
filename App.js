@@ -25,8 +25,8 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Fingerprint" component={FingerprintScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ChatRoom" component={ChatRoomScreen} option={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
