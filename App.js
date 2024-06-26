@@ -21,7 +21,7 @@ const uuid = uuidv4();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Land">
+      <Stack.Navigator initialRouteName="SemiApp">
         <Stack.Screen name="Land" component={Landingpage} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
