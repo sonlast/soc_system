@@ -1,12 +1,19 @@
-import React, { Component } from 'react'
-import { Text, View } from 'react-native'
+import * as React from 'react'
+import { StyleSheet, Text, View } from 'react-native'
 
-export default class HomeScreen extends Component {
-  render() {
-    return (
-      <View>
-        <Text> textInComponent </Text>
-      </View>
-    )
-  }
+const HomeScreen = () => {
+  return (
+    <View container>
+      <Text> textInComponent </Text>
+    </View>
+  )
 }
+
+const style = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+})
+
+export default HomeScreen;
