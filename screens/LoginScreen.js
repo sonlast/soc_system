@@ -9,7 +9,7 @@ const LoginScreen = () => {
 
   pressLogin = () => {
     console.log('Login pressed');
-    navigate.navigate('Home');
+    navigate.navigate('SemiApp');
   }
 
   let [fontsLoaded, fontError] = useFonts({

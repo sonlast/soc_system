@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 
@@ -7,53 +7,88 @@ const data = [
   {
     id: '1',
     title: 'Aiah Arceta',
-    image: require('../assets/profilepic.jpeg'),
+    image: require('../assets/bini/aiah.jpg'),
   },
   {
     id: '2',
     title: 'Colet Vergara',
-    image: require('../assets/profilepic.jpeg'),
+    image: require('../assets/bini/colet.jpg'),
   },
   {
     id: '3',
-    title: 'Maloi Ricalde',
+    title: 'Kylo Ren',
     image: require('../assets/profilepic.jpeg'),
   },
   {
     id: '4',
-    title: 'Gwen Apuli',
-    image: require('../assets/profilepic.jpeg'),
+    title: 'Maloi Ricalde',
+    image: require('../assets/bini/maloi.jpg'),
   },
   {
     id: '5',
-    title: 'Stacey Sevilleja',
-    image: require('../assets/profilepic.jpeg'),
+    title: 'AJ Yape',
+    image: require('../assets/bini/aj.jpg'),
   },
   {
     id: '6',
-    title: 'Mikha Lim',
-    image: require('../assets/profilepic.jpeg'),
+    title: 'Princess Torres',
+    image: require('../assets/bini/cess.jpg'),
   },
   {
     id: '7',
-    title: 'Jhoanna Robles',
-    image: require('../assets/profilepic.jpeg'),
+    title: 'Gwen Apuli',
+    image: require('../assets/bini/gwen.jpg'),
   },
   {
     id: '8',
+    title: 'Stacey Sevilleja',
+    image: require('../assets/bini/stacey.jpg'),
+  },
+  {
+    id: '9',
+    title: 'Alfea Zulueta',
+    image: require('../assets/bini/alf.jpg'),
+  },
+  {
+    id: '10',
+    title: 'Mikha Lim',
+    image: require('../assets/bini/mikha.jpg'),
+  },
+  {
+    id: '11',
+    title: 'Nicole Torres',
+    image: require('../assets/bini/nics.jpg'),
+  },
+  {
+    id: '12',
+    title: 'Jhoanna Robles',
+    image: require('../assets/bini/jho.jpg'),
+  },
+  {
+    id: '13',
+    title: 'Klaus Lastimosa',
+    image: require('../assets/bini/klaus.jpg'),
+  },
+  {
+    id: '14',
     title: 'Sheena Catacutan',
-    image: require('../assets/profilepic.jpeg'),
-  }
+    image: require('../assets/bini/sheena.jpg'),
+  },
+  {
+    id: '15',
+    title: 'Jazmine Henry',
+    image: require('../assets/bini/jaz.jpg'),
+  },
 ];
 
 const Item = ({ title, image }) => (
   <View style={styles.item}>
-    <Image source={image} style={styles.image}/>
+    <Image source={image} style={styles.image} />
     <Text style={styles.title}>{title}</Text>
   </View>
 )
 
-const HomeScreen = () => {
+const Chats = () => {
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
     TitilliumWeb_600SemiBold,
@@ -74,21 +109,31 @@ const HomeScreen = () => {
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            <TouchableOpacity>
+            <Pressable
+              onPress={() => {
+                console.log('Profile Picture Pressed');
+              }}
+              style={({ pressed }) => [
+                {
+                  opacity: pressed ? 0.5 : 1,
+                }
+              ]}
+            >
               <Image
                 style={styles.profilepic}
                 source={require('../assets/profilepic.jpeg')}
               />
-            </TouchableOpacity>
+            </Pressable>
             <Text style={styles.textheader}>
               Safe-on-chat
             </Text>
           </View>
           <FlatList
+            showsVerticalScrollIndicator={false}
             data={data}
             renderItem={({ item }) => <Item image={item.image} title={item.title} />}
             keyExtractor={item => item.id}
-            style={{marginTop: 60}}
+            style={{ marginTop: 1.5, paddingBottom: 40 }}
           />
         </View>
       </LinearGradient>
@@ -103,7 +148,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 50,
+    paddingTop: 30,
     padding: 20,
   },
   linearg: {
@@ -118,7 +163,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     color: 'hsl(0, 0%, 100%)',
     // marginTop: 6,
-    textAlignVertical: 'center',
+    verticalAlign: 'center',
     marginLeft: 10,
   },
   profilepic: {
@@ -134,9 +179,9 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     backgroundColor: '#f9c2ff',
-    padding: 15,
+    padding: 12.5,
     marginVertical: 10,
-    marginHorizontal: 15,
+    marginHorizontal: 5,
     borderRadius: 30,
   },
   title: {
@@ -152,4 +197,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default HomeScreen;
+export default Chats;
