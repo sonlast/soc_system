@@ -11,13 +11,10 @@ const Loading = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("Checking if user is signed in...");
       if (user) {
-        console.log("User is signed in.");
-        navigation.replace("SemiApp");
+        navigation.replace("PinandFingerprint");
       } else {
-        console.log("User is signed out.");
-        navigation.replace("Login");
+        navigation.replace("Land");
       }
     });
 

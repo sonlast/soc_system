@@ -3,13 +3,6 @@ import { BackHandler, Image, Pressable, StyleSheet, Text, View } from 'react-nat
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
 
-const Item = ({ title, image }) => (
-  <View style={styles.item}>
-    <Image source={image} style={styles.image} />
-    <Text style={styles.title}>{title}</Text>
-  </View>
-)
-
 const Calls = () => {
   useEffect(() => {
     const backAction = () => {

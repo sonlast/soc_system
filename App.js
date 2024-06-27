@@ -7,10 +7,10 @@ import LoadingScreen from './screens/Loading';
 import Landingpage from './screens/Landingpage';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
-import FingerprintScreen from './screens/SettingsScreen';
+import SettingsScreen from './screens/SettingsScreen';
 // import HomeScreen from './screens/HomeScreen';
 import SemiApp from './screens/SemiApp';
-import ChatRoomScreen from './screens/ChatRoomScreen';
+import PinandFingerPrint from './screens/PinandFingerprint';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,9 +27,9 @@ export default function App() {
         <Stack.Screen name="Land" component={Landingpage} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Fingerprint" component={FingerprintScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="SemiApp" component={SemiApp} options={{ headerShown: false }} />
-        <Stack.Screen name="ChatRoom" component={ChatRoomScreen} option={{ headerShown: false }}/>
+        <Stack.Screen name="PinandFingerprint" component={PinandFingerPrint} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -47,3 +47,8 @@ export default function App() {
 //! Can't Screenshot
 
 //* Modify Algorithm
+
+//! TASKS for Tomorrow
+//! - rename alert headers
+//! - implement log out functionality 
+//! - switch to pin if FP is unavailable
