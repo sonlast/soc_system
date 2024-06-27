@@ -1,15 +1,14 @@
 import * as React from 'react';
 import { Text, View, Image, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import Chats from './Chats';
 import Calls from './Calls';
-import SettingsScreen from './FingerprintScreen';
+import SettingsScreen from './SettingsScreen';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faRocketchat } from '@fortawesome/free-brands-svg-icons';
 import { faPhone } from '@fortawesome/free-solid-svg-icons';
-
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();

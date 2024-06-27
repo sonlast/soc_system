@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect } from 'react'
+import { Alert, BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
 
@@ -119,17 +119,40 @@ const Item = ({ title, image, text }) => (
     </View> */}
 
 const Chats = () => {
+
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert('Hold on!', 'Are you sure you want to go back?', [
+        {
+          text: 'Cancel',
+          onPress: () => null,
+          style: 'cancel',
+        },
+        {text: 'YES', onPress: () => BackHandler.exitApp()},
+      ]);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  const navigation = useNavigation();
+
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
     TitilliumWeb_600SemiBold,
   });
 
-  const navigation = useNavigation();
 
   if (!fontsLoaded && !fontError) {
     return null;
   }
-
+  
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -192,7 +215,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    paddingTop: 5,
+    paddingTop: 15,
     paddingBottom: 10,
   },
   item: {
@@ -219,7 +242,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingLeft: 10,
     color: "#777",
-    fontFamily: 'TitilliumWeb_400Regular'
+    fontFamily: 'TitilliumWeb_600Bold',
   },
   imageContainer: {
     position: 'relative',

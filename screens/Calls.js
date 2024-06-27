@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect } from 'react'
+import { BackHandler, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
 
@@ -11,6 +11,20 @@ const Item = ({ title, image }) => (
 )
 
 const Calls = () => {
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("Chats");
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
     TitilliumWeb_600SemiBold,
@@ -77,7 +91,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    paddingTop: 5,
+    paddingTop: 15,
     paddingBottom: 10,
   },
 })
