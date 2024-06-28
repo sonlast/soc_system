@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react'
+import React, {useEffect,} from 'react'
 import { BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 //? OPTIONS --> faPen, faUserGroup, faPlus
@@ -116,19 +116,19 @@ import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 
 const Chats = () => {
 
-  useEffect(() => {
-    const backAction = () => {
-      BackHandler.exitApp();
-      return true;
-    };
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        BackHandler.exitApp();
+        return true;
+      };
 
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
-    return () => backHandler.remove();
-  }, []);
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
 
   const navigation = useNavigation();
 
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: {
-    flex: 1,                                                                                 
+    flex: 1,
     paddingTop: 40,
     paddingBottom: 0,
     paddingLeft: 10,

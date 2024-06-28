@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef} from 'react';
-import { View, Text, Button, StyleSheet, Alert, Pressable } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { BackHandler, View, Text, Button, StyleSheet, Alert, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
+import { faUnlock, faDeleteLeft, faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import PinView from 'react-native-pin-view';
@@ -14,7 +14,17 @@ const AuthScreen = ({ navigation }) => {
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const [authError, setAuthError] = useState('');
   const [showPinView, setShowPinView] = useState(false);
-  
+
+  //! ADDED 
+  const [showRemoveButton, setShowRemoveButton] = useState(false)
+  const [enteredPin, setEnteredPin] = useState("")
+  const [showCompletedButton, setShowCompletedButton] = useState(false)
+
+  const isValidPin = (pin) => {
+    // Example validation: PIN must be 4 digits and not all digits the same
+    return /^\d{4}$/.test(pin) && !/^(\d)\1+$/.test(pin);
+  };
+
   useEffect(() => {
     (async () => {
       const compatible = await LocalAuthentication.hasHardwareAsync();
@@ -29,6 +39,34 @@ const AuthScreen = ({ navigation }) => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("Land");
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  //! ADDED
+  useEffect(() => {
+    if (enteredPin.length > 0) {
+      setShowRemoveButton(true)
+    } else {
+      setShowRemoveButton(false)
+    }
+    if (enteredPin.length === 4) {
+      setShowCompletedButton(true)
+    } else {
+      setShowCompletedButton(false)
+    }
+  }, [enteredPin])
 
   const handleAuthentication = async () => {
     const hasHardware = await LocalAuthentication.hasHardwareAsync();
@@ -111,32 +149,46 @@ const AuthScreen = ({ navigation }) => {
               Authenticate
             </Text>
           </Pressable>
-        ) : (
-          <Text style={{ fontFamily: 'TitilliumWeb_400Regular', color: '#fff', fontSize: 15, }}>Biometric authentication is not supported on this device.</Text>
-        )}
-        {showPinView && (
+        ) : showPinView && (
           <ReactNativePinView
-            ref={pinView}
             onComplete={(inputtedPin, clear) => handlePinComplete(inputtedPin, clear)}
-            // onComplete={handlePinComplete}
+            //! ADDED
+            inputSize={32}
+            ref={pinView}
             pinLength={4}
-            buttonBgColor="#fff"
-            buttonTextColor="#000"
-            inputBgColor="#000"
-            inputBgOpacity={0.10}
-            inputActiveBgColor="#fff"
-            inputBorderColor="#fff"
-            inputActiveBorderColor="#fff"
-            buttonDeletePosition="right"
-            buttonDeleteBgColor="#fff"
-            buttonDeleteTextColor="#000"
-            buttonDeleteText="Delete"
-            buttonDeleteTextFontSize={20}
-            buttonDeleteTextFontFamily="TitilliumWeb_400Regular"
-            buttonDeleteTextFontWeight="bold"
-            buttonDeleteTextFontStyle="italic"
-            buttonDeleteTextFontColor="#000"
-            buttonDeleteTextFontVariant="small-caps"
+            buttonSize={60}
+            onValueChange={value => setEnteredPin(value)}
+            buttonAreaStyle={{
+              marginTop: 24,
+            }}
+            inputAreaStyle={{
+              marginBottom: 25,
+            }}
+            inputViewEmptyStyle={{
+              backgroundColor: "transparent",
+              borderWidth: 3,
+              borderColor: "#fff",
+            }}
+            inputViewFilledStyle={{
+              backgroundColor: "#fff",
+            }}
+            buttonViewStyle={{
+              backgroundColor: "#000",
+              borderWidth: 3,
+              borderColor: "#FFF",
+            }}
+            buttonTextStyle={{
+              color: "#FFF",
+            }}
+            onButtonPress={key => {
+              if (key === "custom_left") {
+                pinView.current.clear()
+              } else if (key === "custom_right") {
+                handlePinComplete(enteredPin, pinView.current.clear)
+              }
+            }}
+            customLeftButton={showRemoveButton ? <FontAwesomeIcon icon={faDeleteLeft} size={48} color={"#000"} /> : undefined}
+            customRightButton={showCompletedButton ? <FontAwesomeIcon icon={faUnlock} size={48} color={"#000"} /> : undefined}
           />
         )}
         {authError ? (

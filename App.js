@@ -49,5 +49,8 @@ export default function App() {
 //* Modify Algorithm
 
 //! TASKS for Tomorrow
-//! - switch to pin if FP is unavailable
 //! - implement RSA / TwoFish Encryption 
+//! - configure pin validation based on the account usage
+//! - let user set pin / fingerprint if it is available
+//! - navigation handling
+//! - logout warning

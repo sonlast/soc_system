@@ -51,9 +51,7 @@ const Landingpage = () => {
         </Pressable>
         <View style={styles.groupedtext}>
           <Text style={styles.randomtext}>No Account?</Text>
-          <Text style={{ color: '#ff8989', ...styles.randomtext }} onPress={pressSignUp}> Sign Up Here</Text>
-          {/* Optional Styling */}
-          {/* <Text style={[{color: '#0000ff'}, styles.randomtext]} onPress={pressSignUp}> Sign Up Here</Text> */}
+          <Text style={[{color: '#0000ff'}, styles.randomtext]} onPress={pressSignUp}> Sign Up Here</Text>
         </View>
       </LinearGradient>
     </View>
