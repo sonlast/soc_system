@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Alert, BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
 
@@ -122,14 +122,7 @@ const Chats = () => {
 
   useEffect(() => {
     const backAction = () => {
-      Alert.alert('Hold on!', 'Are you sure you want to go back?', [
-        {
-          text: 'Cancel',
-          onPress: () => null,
-          style: 'cancel',
-        },
-        {text: 'YES', onPress: () => BackHandler.exitApp()},
-      ]);
+      BackHandler.exitApp();
       return true;
     };
 
@@ -242,7 +235,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingLeft: 10,
     color: "#777",
-    fontFamily: 'TitilliumWeb_600Bold',
+    fontFamily: 'TitilliumWeb_600SemiBold',
   },
   imageContainer: {
     position: 'relative',

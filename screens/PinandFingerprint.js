@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect, useRef} from 'react';
+import { View, Text, Button, StyleSheet, Alert, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { useFonts, TitilliumWeb_400Regular } from '@expo-google-fonts/titillium-web';
+import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
+import PinView from 'react-native-pin-view';
 
 const AuthScreen = ({ navigation }) => {
-  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+  const pinView = useRef(null);
 
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [showPinView, setShowPinView] = useState(false);
+  
   useEffect(() => {
     (async () => {
       const compatible = await LocalAuthentication.hasHardwareAsync();
       setIsBiometricSupported(compatible);
+      setShowPinView(!compatible);
     })();
   }, []);
 
@@ -32,16 +38,31 @@ const AuthScreen = ({ navigation }) => {
     });
 
     if (result.success) {
-      Alert.alert('Authentication successful!');
+      setAuthError('Authentication successful');
       // Navigate to the next screen
-      navigation.navigate('SemiApp');
+      setTimeout(() => {
+
+        navigation.navigate('SemiApp');
+      }, 1000)
     } else {
-      Alert.alert('Authentication failed.');
+      setAuthError('Authentication failed.');
     }
   };
 
+  const handlePinComplete = (inputtedPin, clear) => {
+    // Here, you should validate the entered PIN
+    // For demonstration, let's assume any PIN is correct
+    clear();
+    setAuthError('Authentication successful');
+    // Navigate to the next screen
+    setTimeout(() => {
+      navigation.navigate('SemiApp');
+    }, 1000)
+  }
+
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
+    TitilliumWeb_600SemiBold,
   });
 
   if (!fontsLoaded && !fontError) {
@@ -57,20 +78,64 @@ const AuthScreen = ({ navigation }) => {
           left: 0,
           right: 0,
           top: 0,
-          height: '100%', 
+          height: '100%',
           ...styles.container
         }}
         start={[0.5, 0.5]}
       >
-        <Text style={styles.title}>Authentication</Text>
+        <Text style={styles.title}>AUTHENTICATION</Text>
         {isBiometricSupported ? (
-        <FontAwesomeIcon icon={faFingerprint} size={100} style={{color: "#fff", marginBottom: 20}}/>
+          <FontAwesomeIcon icon={faFingerprint} size={150} style={{ color: "#fff", marginBottom: 20 }} />
         ) : null}
         {isBiometricSupported ? (
-          <Button title="Authenticate" onPress={handleAuthentication} />
+          <Pressable
+            style={{
+              backgroundColor: '#fff',
+              padding: 10,
+              borderRadius: 5,
+              marginTop: 20,
+            }}
+            onPress={handleAuthentication}>
+            <Text style={{
+              fontFamily: 'TitilliumWeb_400Regular'
+            }}>
+
+              Authenticate
+            </Text>
+          </Pressable>
         ) : (
-          <Text>Biometric authentication is not supported on this device.</Text>
+          <Text style={{ fontFamily: 'TitilliumWeb_400Regular', color: '#fff', fontSize: 15, }}>Biometric authentication is not supported on this device.</Text>
         )}
+        {showPinView && (
+          <PinView
+            ref={pinView}
+            // onComplete={(inputtedPin, clear) => handlePinComplete(inputtedPin, clear)}
+            onComplete={handlePinComplete}
+            pinLength={4}
+            buttonBgColor="#fff"
+            buttonTextColor="#000"
+            inputBgColor="#000"
+            inputBgOpacity={0.10}
+            inputActiveBgColor="#fff"
+            inputBorderColor="#fff"
+            inputActiveBorderColor="#fff"
+            buttonDeletePosition="right"
+            buttonDeleteBgColor="#fff"
+            buttonDeleteTextColor="#000"
+            buttonDeleteText="Delete"
+            buttonDeleteTextFontSize={20}
+            buttonDeleteTextFontFamily="TitilliumWeb_400Regular"
+            buttonDeleteTextFontWeight="bold"
+            buttonDeleteTextFontStyle="italic"
+            buttonDeleteTextFontColor="#000"
+            buttonDeleteTextFontVariant="small-caps"
+          />
+        )}
+        {authError ? (
+          <Text style={{ color: authError === 'Authentication successful' ? '#00FF00' : 'red', marginTop: 20, fontFamily: 'TitilliumWeb_400Regular' }}>
+            {authError}
+          </Text>
+        ) : null}
       </LinearGradient>
     </View>
   );
@@ -84,8 +149,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    marginBottom: 20,
-    fontFamily: 'TitilliumWeb_400Regular',
+    color: '#fff',
+    marginBottom: 50,
+    fontFamily: 'TitilliumWeb_600SemiBold',
   },
 });
 
@@ -151,7 +217,7 @@ export default AuthScreen;
 //           left: 0,
 //           right: 0,
 //           top: 0,
-//           height: '100%', 
+//           height: '100%',
 //           ...styles.container
 //         }}
 //         start={[0.5, 0.5]}

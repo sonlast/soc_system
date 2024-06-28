@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Pressable, Text, TextInput, View, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { BackHandler, Image, KeyboardAvoidingView, Pressable, Text, TextInput, View, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
@@ -16,61 +16,67 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
   const auth = getAuth(app);
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("Land");
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   const pressLogin = () => {
     setLoading(true);
+
 
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
         AsyncStorage.setItem("lastemail", email);
-        Alert.alert("Quick Aid", "Login successful.");
-        navigation.navigate("SemiApp");
+        setAuthError("Log in successful.");
+        setTimeout(() => {
+          navigation.navigate("SemiApp");
+        }, 1000);
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
         switch (errorCode) {
           case "auth/invalid-login-credentials":
-            Alert.alert("Quick Aid", "Account doesn't exist.");
+            setAuthError("Account doesn't exist.");
             break;
           case "auth/invalid-credential":
-            Alert.alert("Quick Aid", "Invalid credentials.");
+            setAuthError("Invalid Credentials");
             break;
           case "auth/user-not-found":
-            Alert.alert("Quick Aid", "Account doesn't exist.");
+            setAuthError("Account doesn't exist.");
             break;
           case "auth/invalid-email":
-            Alert.alert(
-              "Quick Aid",
-              "Invalid email address. Please provide a valid email."
-            );
+            setAuthError("Please provide a valid email.");
             break;
           case "auth/weak-password":
-            Alert.alert(
-              "Quick Aid",
-              "Password is too weak. Please provide a stronger password."
-            );
+            setAuthError("Password is too weak. Please provide a stronger password.");
             break;
           case "auth/wrong-password":
-            Alert.alert("Quick Aid", "Incorrect password.");
+            setAuthError("Incorrect password.");
             break;
           case "auth/missing-password":
-            Alert.alert("Quick Aid", "Please provide a password.");
+            setAuthError("Please provide a password.");
             break;
           case "auth/too-many-requests":
-            Alert.alert(
-              "Quick Aid",
-              "Too many requests. Please try again later."
-            );
+            setAuthError("Too many requests. Please try again later.");
             break;
           default:
-            Alert.alert(
-              "Quick Aid",
-              `Account creation error: ${errorMessage} (Error Code: ${errorCode})`
-            );
+            setAuthError("An unexpected error occurred. Please try again later.");
             break;
         }
       })
@@ -90,63 +96,72 @@ const LoginScreen = () => {
   }
 
   return (
-      <KeyboardAvoidingView
+    <KeyboardAvoidingView
       style={styles.container}
-        // behavior={Platform.OS === "ios" ? "padding" : "height"}
-        // keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+    >
+      <LinearGradient
+        colors={['#4c669f', '#f0ceff']}
+        style={
+          styles.linearg
+        }
+        start={[0.5, 0.5]}
       >
-        <LinearGradient
-          colors={['#4c669f', '#f0ceff']}
-          style={
-            styles.linearg
-          }
-          start={[0.5, 0.5]}
-        >
-          <Image
-            style={styles.logo}
-            source={require('../assets/soclogo.png')}
-          />
-          <TextInput
-            placeholderTextColor={'rgb(200, 200, 200)'}
-            placeholder='Email'
-            autoCapitalize='none'
-            style={styles.input}
-            autoFocus={true}
-            inputMode='email'
-            value={email}
-            onChangeText={(text) => {
-              console.log("Typing email...");
-              setEmail(text);
-            }}
-          />
-          <TextInput
-            placeholderTextColor={'rgb(220, 220, 220)'}
-            placeholder='Password'
-            autoCapitalize='none'
-            style={styles.input}
-            secureTextEntry={true}
-            contextMenuHidden={true}
-            value={password}
-            onChangeText={(text) => {
-              console.log("Typing password...");
-              setPassword(text);
-            }}
-          />
-          <Pressable
-            style={({ pressed }) => [
-              {
-                backgroundColor: pressed
-                  ? 'rgb(210, 230, 255)'
-                  : 'rgb(255, 255, 255)',
-              },
-              styles.loginbutton
-            ]}
-            onPress={pressLogin}
+        <Image
+          style={styles.logo}
+          source={require('../assets/soclogo.png')}
+        />
+        <TextInput
+          placeholderTextColor={'rgb(200, 200, 200)'}
+          placeholder='Email'
+          autoCapitalize='none'
+          style={styles.input}
+          autoFocus={true}
+          inputMode='email'
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+          }}
+        />
+        <TextInput
+          placeholderTextColor={'rgb(220, 220, 220)'}
+          placeholder='Password'
+          autoCapitalize='none'
+          style={styles.input}
+          secureTextEntry={true}
+          contextMenuHidden={true}
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+          }}
+        />
+        {authError ? (
+          <Text style={{
+            color: authError.includes('Log in successful') ? '#00FF00' : 'red',
+            marginTop: 20,
+            fontFamily: 'TitilliumWeb_400Regular',
+            textAlign: 'center',
+          }}
           >
-            <Text style={styles.logintext}>LOG IN</Text>
-          </Pressable>
-        </LinearGradient>
-      </KeyboardAvoidingView>
+            {authError}
+          </Text>
+        ) : null}
+        <Pressable
+          style={({ pressed }) => [
+            {
+              backgroundColor: pressed
+                ? 'rgb(210, 230, 255)'
+                : 'rgb(255, 255, 255)',
+            },
+            styles.loginbutton
+          ]}
+          onPress={pressLogin}
+        >
+          <Text style={styles.logintext}>LOG IN</Text>
+        </Pressable>
+      </LinearGradient>
+    </KeyboardAvoidingView>
   )
 }
 

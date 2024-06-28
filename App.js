@@ -52,3 +52,4 @@ export default function App() {
 //! - rename alert headers
 //! - implement log out functionality 
 //! - switch to pin if FP is unavailable
+//! - implement RSA / TwoFish Encryption 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, Image, StyleSheet } from 'react-native';
+import { Text, View, Image, StyleSheet, Pressable } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import Chats from './Chats';
@@ -9,21 +9,47 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faRocketchat } from '@fortawesome/free-brands-svg-icons';
 import { faPhone } from '@fortawesome/free-solid-svg-icons';
+import { getAuth, signOut } from 'firebase/auth';
+import { useNavigation  } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = (props) => {
+  const auth = getAuth();
+  const navigator = useNavigation();
+
   return (
     <DrawerContentScrollView {...props}>
-      <View style={styles.drawerHeader}>
-        <Image
-          style={styles.profilepic}
-          source={require('../assets/profilepic.jpeg')}
-        />
-        <Text style={styles.drawerHeaderText}>Safe-on-chat</Text>
+      <View style={{ flex: 1 }}>
+        <View style={styles.drawerHeader}>
+          <Image
+            style={styles.profilepic}
+            source={require('../assets/profilepic.jpeg')}
+          />
+          <Text style={styles.drawerHeaderText}>Safe-on-chat</Text>
+        </View>
+        <DrawerItemList {...props} />
       </View>
-      <DrawerItemList {...props} />
+      <Pressable
+        style={{
+          marginBottom: 20,
+          paddingVertical: 15,
+          paddingHorizontal: 10,
+          backgroundColor: '#f0f0f0',
+          borderRadius: 5,
+        }}
+        onPress={async () => {
+          await signOut(auth);
+          navigator.navigate("Land");
+        }}
+      >
+        <Text style={{
+          fontFamily: 'TitilliumWeb_400Regular',
+          fontSize: 16,
+          color: '#333',
+        }}>Log Out</Text>
+      </Pressable>
     </DrawerContentScrollView>
   );
 };
@@ -95,8 +121,8 @@ const TabNavigator = () => {
 const DrawerNavigator = () => {
   return (
     <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}>
-      <Drawer.Screen name="Home" component={TabNavigator} options={{headerShown: false}}/>
-      <Drawer.Screen name="Settings" component={SettingsScreen} options= {{ headerShown: false}}/>
+      <Drawer.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
     </Drawer.Navigator>
   );
 };

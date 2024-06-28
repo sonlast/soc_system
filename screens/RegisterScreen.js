@@ -34,6 +34,26 @@ const RegisterScreen = () => {
   //     setMatched('');
   //   }
   // }, [password, confirmPassword]);
+  const validatePassword = (password) => {
+    const errors = [];
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long.");
+    }
+    if (!password.match(/[A-Z]/)) {
+      errors.push("Password must contain at least one uppercase letter.");
+    }
+    if (!password.match(/[a-z]/)) {
+      errors.push("Password must contain at least one lowercase letter.");
+    }
+    if (!password.match(/[0-9]/)) {
+      errors.push("Password must contain at least one number.");
+    }
+    if (!password.match(/[\W_]/)) {
+      errors.push("Password must contain at least one special character.");
+    }
+    return errors;
+  };
+
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
     TitilliumWeb_600SemiBold,
@@ -44,6 +64,12 @@ const RegisterScreen = () => {
   }
 
   const pressSignup = () => {
+    if (!password || !confirmPassword) {
+      setError('Fill in the required fields.');
+      setMatched('');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       setMatched('');
@@ -51,6 +77,13 @@ const RegisterScreen = () => {
     } else {
       setError('');
       setMatched('Passwords matched');
+    }
+
+    const passwordErrors = validatePassword(password);
+    if (passwordErrors.length > 0) {
+      // Step 4: Provide Feedback
+      setError(passwordErrors.join("\n"));
+      return; // Stop the signup process if validation fails
     }
 
     createUserWithEmailAndPassword(auth, email, password)
@@ -64,7 +97,7 @@ const RegisterScreen = () => {
           email: email,
         });
 
-        Alert.alert("Quick Aid", "Account created successfully!");
+        Alert.alert("SAFE-ON-CHAT", "Account created successfully!");
         navigation.navigate("Login", { username: username });
         // ...
       })
@@ -74,26 +107,26 @@ const RegisterScreen = () => {
 
         switch (errorCode) {
           case "auth/invalid-email":
-            Alert.alert("Quick Aid", "Fill in the required fields.");
+            Alert.alert("SAFE-ON-CHAT", "Fill in the required fields.");
             break;
           case "auth/missing-password":
-            Alert.alert("Quick Aid", "Fill in your password.");
+            Alert.alert("SAFE-ON-CHAT", "Fill in your password.");
             break;
           case "auth/missing-email":
-            Alert.alert("Quick Aid", "Fill in your email address.");
+            Alert.alert("SAFE-ON-CHAT", "Fill in your email address.");
             break;
           case "auth/weak-password":
-            Alert.alert("Quick Aid", "Password is too weak. It must be at least 6 characters long.");
+            Alert.alert("SAFE-ON-CHAT", "Password is too weak. It must be at least 6 characters long.");
             break;
           case "auth/email-already-in-use":
             Alert.alert(
-              "Quick Aid",
+              "SAFE-ON-CHAT",
               "The email address is already in use by another account."
             );
             break;
           default:
             Alert.alert(
-              "Quick Aid",
+              "SAFE-ON-CHAT",
               `Account creation error: ${errorMessage} (Error Code: ${errorCode})`
             );
             break;
@@ -130,7 +163,6 @@ const RegisterScreen = () => {
             keyboardType="email-address"
             value={username}
             onChangeText={(text) => {
-              console.log("Typing username...");
               setUsername(text);
             }}
           />
@@ -144,7 +176,6 @@ const RegisterScreen = () => {
             autoFocus={false}
             value={email}
             onChangeText={(text) => {
-              console.log("Typing email...");
               setEmail(text);
             }}
           />
@@ -158,7 +189,6 @@ const RegisterScreen = () => {
             contextMenuHidden={true}
             value={password}
             onChangeText={(text) => {
-              console.log("Typing password...");
               setPassword(text);
             }}
           />
