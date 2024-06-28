@@ -6,6 +6,7 @@ import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import PinView from 'react-native-pin-view';
+import ReactNativePinView from 'react-native-pin-view';
 
 const AuthScreen = ({ navigation }) => {
   const pinView = useRef(null);
@@ -19,6 +20,13 @@ const AuthScreen = ({ navigation }) => {
       const compatible = await LocalAuthentication.hasHardwareAsync();
       setIsBiometricSupported(compatible);
       setShowPinView(!compatible);
+      if (compatible) {
+        const supported = await LocalAuthentication.supportedAuthenticationTypesAsync();
+        const enrolled = await LocalAuthentication.isEnrolledAsync();
+        if (supported.length > 0 && enrolled) {
+          handleAuthentication();
+        }
+      }
     })();
   }, []);
 
@@ -107,10 +115,10 @@ const AuthScreen = ({ navigation }) => {
           <Text style={{ fontFamily: 'TitilliumWeb_400Regular', color: '#fff', fontSize: 15, }}>Biometric authentication is not supported on this device.</Text>
         )}
         {showPinView && (
-          <PinView
+          <ReactNativePinView
             ref={pinView}
-            // onComplete={(inputtedPin, clear) => handlePinComplete(inputtedPin, clear)}
-            onComplete={handlePinComplete}
+            onComplete={(inputtedPin, clear) => handlePinComplete(inputtedPin, clear)}
+            // onComplete={handlePinComplete}
             pinLength={4}
             buttonBgColor="#fff"
             buttonTextColor="#000"

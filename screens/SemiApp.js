@@ -7,10 +7,10 @@ import Calls from './Calls';
 import SettingsScreen from './SettingsScreen';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faRocketchat } from '@fortawesome/free-brands-svg-icons';
-import { faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faCommentDots, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { getAuth, signOut } from 'firebase/auth';
-import { useNavigation  } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -83,18 +83,27 @@ const CallsScreen = () => {
 };
 
 const TabNavigator = () => {
+  let [fontsLoaded, fontError] = useFonts({
+    TitilliumWeb_400Regular,
+    TitilliumWeb_600SemiBold,
+  });
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarStyle: {
-          height: 70,
+          height: 65,
           paddingBottom: 10,
           paddingTop: 20,
-          backgroundColor: '#4c669f',
+          backgroundColor: '#eff',
           borderTopWidth: 0,
         },
         tabBarLabelStyle: {
-          fontFamily: 'TitilliumWeb_400Regular',
+          fontFamily: 'TitilliumWeb_600SemiBold',
           fontSize: 15,
           color: ({ focused }) => (
             focused ? '#00ff' : '#000'
@@ -104,14 +113,29 @@ const TabNavigator = () => {
     >
       <Tab.Screen name="Chats" component={ChatsScreen} options={{
         headerShown: false,
-        tabBarIcon: ({ focused, size }) => (
-          <FontAwesomeIcon icon={faRocketchat} color={focused ? "#00ff" : "#000"} size={size} />
+        tabBarIcon: ({ focused }) => (
+          <FontAwesomeIcon
+            icon={faCommentDots}
+            color={focused ? "#000" : "#4c669f"}
+            size={25}
+            style={{
+              marginBottom: 15,
+            }}
+          />
         ),
       }}
       />
       <Tab.Screen name="Calls" component={CallsScreen} options={{
-        headerShown: false, tabBarIcon: ({ focused, color, size }) => (
-          <FontAwesomeIcon icon={faPhone} color={focused ? "#00ff" : "#000"} size={size} />
+        headerShown: false,
+        tabBarIcon: ({ focused }) => (
+          <FontAwesomeIcon
+            icon={faPhone}
+            color={focused ? "#000" : "#4c669f"}
+            size={25}
+            style={{
+              marginBottom: 15,
+            }}
+          />
         ),
       }} />
     </Tab.Navigator>
@@ -120,7 +144,16 @@ const TabNavigator = () => {
 
 const DrawerNavigator = () => {
   return (
-    <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}>
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        drawerStyle: {
+          backgroundColor: '#f0f0f0',
+          width: 290,
+        },
+        drawerType: 'back',
+      }}
+    >
       <Drawer.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
       <Drawer.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
     </Drawer.Navigator>
@@ -147,6 +180,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    backgroundColor: "#4c669f",
   },
   profilepic: {
     width: 50,

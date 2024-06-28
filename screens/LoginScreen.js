@@ -73,7 +73,7 @@ const LoginScreen = () => {
             setAuthError("Please provide a password.");
             break;
           case "auth/too-many-requests":
-            setAuthError("Too many requests. Please try again later.");
+            setAuthError("Too many attempts. Please try again later.");
             break;
           default:
             setAuthError("An unexpected error occurred. Please try again later.");

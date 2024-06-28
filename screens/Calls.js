@@ -35,7 +35,6 @@ const Calls = () => {
           <View style={styles.header}>
             <Pressable
               onPress={() => {
-                console.log('Profile Picture Pressed');
                 navigation.openDrawer();
               }}
               style={({ pressed }) => [

@@ -8,12 +8,10 @@ const Landingpage = () => {
   const navigation = useNavigation();
 
   const pressSignUp = () => {
-    console.log('Sign Up pressed');
     navigation.navigate('Register');
   }
 
   const pressLogin = () => {
-    console.log('Login pressed');
     navigation.navigate('Login');
   }
   let [fontsLoaded, fontError] = useFonts({
@@ -53,7 +51,7 @@ const Landingpage = () => {
         </Pressable>
         <View style={styles.groupedtext}>
           <Text style={styles.randomtext}>No Account?</Text>
-          <Text style={{ color: '#0000ff', ...styles.randomtext }} onPress={pressSignUp}> Sign Up Here</Text>
+          <Text style={{ color: '#ff8989', ...styles.randomtext }} onPress={pressSignUp}> Sign Up Here</Text>
           {/* Optional Styling */}
           {/* <Text style={[{color: '#0000ff'}, styles.randomtext]} onPress={pressSignUp}> Sign Up Here</Text> */}
         </View>
