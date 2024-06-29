@@ -91,7 +91,7 @@ const RegisterScreen = () => {
         });
         setAuthError("Account created successfully!");
         setTimeout(() => {
-          navigation.navigate("Login");
+          navigation.navigate("SignUpAuth");
         }, 1000);
         // ...
       })

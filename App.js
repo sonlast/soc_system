@@ -11,6 +11,7 @@ import SettingsScreen from './screens/SettingsScreen';
 // import HomeScreen from './screens/HomeScreen';
 import SemiApp from './screens/SemiApp';
 import PinandFingerPrint from './screens/PinandFingerprint';
+import SignUpAuth from './screens/PinandFingerprintSignUp';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -30,6 +31,7 @@ export default function App() {
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="SemiApp" component={SemiApp} options={{ headerShown: false }} />
         <Stack.Screen name="PinandFingerprint" component={PinandFingerPrint} options={{ headerShown: false }} />
+        <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

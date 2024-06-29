@@ -19,6 +19,15 @@ const CustomDrawerContent = (props) => {
   const auth = getAuth();
   const navigator = useNavigation();
 
+  let [fontsLoaded, fontError] = useFonts({
+    TitilliumWeb_400Regular,
+    TitilliumWeb_600SemiBold,
+  });
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <DrawerContentScrollView {...props}>
       <View style={{ flex: 1 }}>
