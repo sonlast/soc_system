@@ -7,6 +7,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faUnlock, faDeleteLeft, faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { useFonts, TitilliumWeb_400Regular } from '@expo-google-fonts/titillium-web';
+// import { app } from '../firebaseConfig';
+// import { collection, doc, setDoc } from 'firebase/firestore';
+// import { getFirestore } from 'firebase/firestore';
+// import bcrypt from 'react-native-bcrypt';
+
+// bcrypt.setRandomFallback();
 
 const SignUpScreen = ({ navigation }) => {
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
@@ -15,6 +21,7 @@ const SignUpScreen = ({ navigation }) => {
   const [showRemoveButton, setShowRemoveButton] = useState(false);
   const [showCompletedButton, setShowCompletedButton] = useState(false);
   const [authError, setAuthError] = useState('');
+  const db = getFirestore(app);
 
   useEffect(() => {
     checkBiometricSupport();
@@ -25,15 +32,45 @@ const SignUpScreen = ({ navigation }) => {
     setIsBiometricSupported(compatible);
   };
 
-  const handlePinComplete = async (pin) => {
-    if (pin.length === 4) {
-      await AsyncStorage.setItem('user_pin', pin);
-      setAuthError('Authentication Set Successfully');
-      setTimeout(() => {
-        navigation.navigate('SemiApp');
-      }, 1000)
-    }
+  const handlePinComplete = async (pin) => { 
+    if (pin.length === 4) { 
+      await AsyncStorage.setItem('user_pin', pin); 
+      setAuthError('Authentication Set Successfully'); 
+      setTimeout(() => { 
+        navigation.navigate('SemiApp'); 
+      }, 1000) 
+    } 
   };
+
+  // const handlePinComplete = async (pin) => {
+  //   if (pin.length === 4) {
+  //     try {
+  //       // 1. Hash the PIN
+  //       const hashedPin = await bcrypt.hash(pin, 10); // Adjust saltRounds for security
+
+  //       // 2. Get the current user ID (assuming you have a way to identify the user)
+  //       const userId = await AsyncStorage.getItem('userId'); // Replace with your user ID retrieval logic
+
+  //       // 3. Store the hashed PIN in Firestore
+  //       await setDoc(doc(db, 'users', userId), {
+  //         pin: hashedPin,
+  //         // Other user data
+  //       });
+
+  //       // 4. Store the PIN locally (optional, but can be used for quick access)
+  //       await AsyncStorage.setItem('user_pin', pin); // Store the plain PIN for local use
+
+  //       // 5. Set the success message and navigate
+  //       setAuthError('Authentication Set Successfully');
+  //       setTimeout(() => {
+  //         navigation.navigate('SemiApp');
+  //       }, 1000);
+  //     } catch (error) {
+  //       console.error('Error saving PIN:', error);
+  //       setAuthError('Error setting authentication. Please try again.');
+  //     }
+  //   }
+  // };
 
   const handleFingerprintSetup = async () => {
     const result = await LocalAuthentication.authenticateAsync({
@@ -114,7 +151,7 @@ const SignUpScreen = ({ navigation }) => {
           />
         )}
         {authError ? (
-          <Text style={{ color: authError === 'Authentication Set Successfully ' ? '#00FF00' : 'red', marginTop: 20, fontFamily: 'TitilliumWeb_400Regular' }}>
+          <Text style={{ color: authError === 'Authentication Set Successfully' ? '#00FF00' : 'red', marginTop: 20, fontFamily: 'TitilliumWeb_400Regular' }}>
             {authError}
           </Text>
         ) : null}

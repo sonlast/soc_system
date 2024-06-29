@@ -1,5 +1,5 @@
-import React, { useState  } from 'react';
-import { Alert, Image, Pressable, ScrollView, Text, TextInput, View, StyleSheet, KeyboardAvoidingView } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Image, Pressable, Text, TextInput, View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
@@ -131,96 +131,93 @@ const RegisterScreen = () => {
 
   return (
     <View style={styles.container}>
-      <KeyboardAvoidingView style={styles.container}>
-
-        <LinearGradient
-          colors={['#4c669f', '#f0ceff']}
-          style={
-            styles.linearg
-          }
-          start={[0.5, 0.5]}
-        >
-          <Image
-            style={styles.logo}
-            source={require('../assets/soclogo.png')}
+      <LinearGradient
+        colors={['#4c669f', '#f0ceff']}
+        style={[
+          styles.linearg,
+        ]}
+        start={[0.5, 0.5]}
+      >
+        <Image
+          style={styles.logo}
+          source={require('../assets/soclogo.png')}
+        />
+        <View style={styles.inputs}>
+          <TextInput
+            placeholderTextColor={'rgb(200, 200, 200)'}
+            placeholder='Username'
+            style={[styles.input, { marginTop: 0 }]}
+            autoCapitalize='none'
+            autoFocus={true}
+            inputMode="email"
+            keyboardType="email-address"
+            value={username}
+            onChangeText={(text) => {
+              setUsername(text);
+            }}
           />
-          <View style={styles.inputs}>
-            <TextInput
-              placeholderTextColor={'rgb(200, 200, 200)'}
-              placeholder='Username'
-              style={[styles.input, { marginTop: 0 }]}
-              autoCapitalize='none'
-              autoFocus={true}
-              inputMode="email"
-              keyboardType="email-address"
-              value={username}
-              onChangeText={(text) => {
-                setUsername(text);
-              }}
-            />
-            <TextInput
-              placeholderTextColor={'rgb(220, 220, 220)'}
-              placeholder='Email'
-              style={styles.input}
-              autoCapitalize='none'
-              inputMode="email"
-              keyboardType="email-address"
-              autoFocus={false}
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-              }}
-            />
-            <TextInput
-              placeholderTextColor={'rgb(220, 220, 220)'}
-              placeholder='Password'
-              style={styles.input}
-              autoCapitalize='none'
-              secureTextEntry={true}
-              maxLength={12}
-              contextMenuHidden={true}
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-              }}
-            />
-            <TextInput
-              placeholderTextColor={'rgb(220, 220, 220)'}
-              placeholder='Confirm Password'
-              style={styles.input}
-              autoCapitalize='none'
-              secureTextEntry={true}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-            {error ? <Text style={styles.errorText}>{error}</Text> : <Text style={styles.matchedpass}>{matched}</Text>}
-            {authError ? (
-              <Text style={{
-                color: authError.includes('Account created successfully!') ? '#00FF00' : 'red',
-                marginTop: 20,
-                fontFamily: 'TitilliumWeb_400Regular',
-                textAlign: 'center',
-              }}
-              >
-                {authError}
-              </Text>
-            ) : null}
-          </View>
-          <Pressable
-            style={({ pressed }) => [
-              {
-                backgroundColor: pressed
-                  ? 'rgb(210, 230, 255)'
-                  : 'rgb(255, 255, 255)',
-              },
-              styles.signupbutton
-            ]}
-            onPress={pressSignup}
-          >
-            <Text style={styles.signuptext}>SIGN UP</Text>
-          </Pressable>
-        </LinearGradient>
-      </KeyboardAvoidingView>
+          <TextInput
+            placeholderTextColor={'rgb(220, 220, 220)'}
+            placeholder='Email'
+            style={styles.input}
+            autoCapitalize='none'
+            inputMode="email"
+            keyboardType="email-address"
+            autoFocus={false}
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+            }}
+          />
+          <TextInput
+            placeholderTextColor={'rgb(220, 220, 220)'}
+            placeholder='Password'
+            style={styles.input}
+            autoCapitalize='none'
+            secureTextEntry={true}
+            maxLength={12}
+            contextMenuHidden={true}
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+            }}
+          />
+          <TextInput
+            placeholderTextColor={'rgb(220, 220, 220)'}
+            placeholder='Confirm Password'
+            style={styles.input}
+            autoCapitalize='none'
+            secureTextEntry={true}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+          {error ? <Text style={styles.errorText}>{error}</Text> : <Text style={styles.matchedpass}>{matched}</Text>}
+          {authError ? (
+            <Text style={{
+              color: authError.includes('Account created successfully!') ? '#00FF00' : 'red',
+              marginTop: 20,
+              fontFamily: 'TitilliumWeb_400Regular',
+              textAlign: 'center',
+            }}
+            >
+              {authError}
+            </Text>
+          ) : null}
+        </View>
+        <Pressable
+          style={({ pressed }) => [
+            {
+              backgroundColor: pressed
+                ? 'rgb(210, 230, 255)'
+                : 'rgb(255, 255, 255)',
+            },
+            styles.signupbutton
+          ]}
+          onPress={pressSignup}
+        >
+          <Text style={styles.signuptext}>SIGN UP</Text>
+        </Pressable>
+      </LinearGradient>
     </View >
   )
 }
@@ -229,6 +226,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   linearg: {
     position: 'absolute',

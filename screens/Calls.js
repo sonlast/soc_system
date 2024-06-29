@@ -31,28 +31,35 @@ const Calls = () => {
 
   return (
     <View style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Pressable
-              onPress={() => {
-                navigation.openDrawer();
-              }}
-              style={({ pressed }) => [
-                {
-                  opacity: pressed ? 0.5 : 1,
-                }
-              ]}
-            >
-              <Image
-                style={styles.profilepic}
-                source={require('../assets/profilepic.jpeg')}
-              />
-            </Pressable>
-            <Text style={styles.textheader}>
-              Safe-on-chat
-            </Text>
-          </View>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => {
+              navigation.openDrawer();
+            }}
+            style={({ pressed }) => [
+              {
+                opacity: pressed ? 0.5 : 1,
+              }
+            ]}
+          >
+            <Image
+              style={styles.profilepic}
+              source={require('../assets/profilepic.jpeg')}
+            />
+          </Pressable>
+          <Text style={styles.textheader}>
+            Safe-on-chat
+          </Text>
         </View>
+        <View style={{
+          flex: 1,
+          marginTop: 125,
+        }}>
+          <Text style={styles.temp_text}>No Conversations Found. </Text>
+          <Text style={styles.temp_text}>Start a New Chat.</Text>
+        </View>
+      </View>
     </View>
   )
 }
@@ -86,6 +93,12 @@ const styles = StyleSheet.create({
     paddingTop: 15,
     paddingBottom: 10,
   },
+  temp_text: {
+    fontFamily: 'TitilliumWeb_600SemiBold',
+    fontSize: 25,
+    color: '#fff',
+    textAlign: 'center',
+  }
 })
 
 export default Calls;

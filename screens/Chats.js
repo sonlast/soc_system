@@ -189,7 +189,7 @@ const Chats = () => {
                 }
               ]}
               onPress={
-                console.log('Add Chat Pressed')
+                console.log('CHANGE THIS ONCE THE FUNCTION IS READY.')
               }>
               <FontAwesomeIcon icon={faPenToSquare} color="#f0ceff" size={25} style={{ alignContent: 'center' }} />
             </Pressable>

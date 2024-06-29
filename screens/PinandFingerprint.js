@@ -33,7 +33,6 @@ const AuthScreen = ({ navigation }) => {
       if (result.success) {
         setAuthError('Authentication successful');
         setTimeout(() => {
-
           navigation.navigate('SemiApp');
         }, 1000)
       } else {
@@ -49,9 +48,11 @@ const AuthScreen = ({ navigation }) => {
 
   const handlePinComplete = async (pin, clear) => {
     if (pin === storedPin) {
-      setAuthError('Authentication Successful');
+      setAuthError('Authentication successful');
       clear();
-      navigation.navigate('SemiApp');
+      setTimeout(() => {
+        navigation.navigate('SemiApp');
+      }, 1000)
     } else {
       setAuthError('Incorrect PIN');
       clear();

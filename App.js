@@ -52,7 +52,7 @@ export default function App() {
 
 //! TASKS for Tomorrow
 //! - implement RSA / TwoFish Encryption 
-//! - configure pin validation based on the account usage
-//! - let user set pin / fingerprint if it is available
 //! - navigation handling
 //! - logout warning
+//! - margin / padding top
+//! - configure pin for global storage
