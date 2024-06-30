@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, Image, Pressable, Text, TextInput, View, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Alert, BackHandler, KeyboardAvoidingView, Image, Pressable, Text, TextInput, View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
@@ -41,22 +41,14 @@ const RegisterScreen = () => {
     return errors;
   };
 
-  let [fontsLoaded, fontError] = useFonts({
-    TitilliumWeb_400Regular,
-    TitilliumWeb_600SemiBold,
-  });
-
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
-
+  
   const pressSignup = () => {
     const formattedUsername = username.startsWith('@') ? username : `@${username}`;
     if (!username.trim()) {
       setError('Username is required');
       return;
     }
-
+    
     if (!password || !confirmPassword) {
       setError('Fill in the required fields.');
       setMatched('');
@@ -71,7 +63,7 @@ const RegisterScreen = () => {
       setError('');
       setMatched('Passwords matched');
     }
-
+    
     const passwordErrors = validatePassword(password);
     if (passwordErrors.length > 0) {
       // Step 4: Provide Feedback
@@ -83,7 +75,7 @@ const RegisterScreen = () => {
       .then(async (userCredential) => {
         // Signed in
         const user = userCredential.user;
-
+        
         const userDoc = doc(firestore, "users", user.uid);
         await setDoc(userDoc, {
           username: formattedUsername,
@@ -128,6 +120,28 @@ const RegisterScreen = () => {
       });
   };
 
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("Land");
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  let [fontsLoaded, fontError] = useFonts({
+    TitilliumWeb_400Regular,
+    TitilliumWeb_600SemiBold,
+  });
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
@@ -138,85 +152,90 @@ const RegisterScreen = () => {
         ]}
         start={[0.5, 0.5]}
       >
-        <Image
-          style={styles.logo}
-          source={require('../assets/soclogo.png')}
-        />
-        <View style={styles.inputs}>
-          <TextInput
-            placeholderTextColor={'rgb(200, 200, 200)'}
-            placeholder='Username'
-            style={[styles.input, { marginTop: 0 }]}
-            autoCapitalize='none'
-            autoFocus={true}
-            inputMode="email"
-            keyboardType="email-address"
-            value={username}
-            onChangeText={(text) => {
-              setUsername(text);
-            }}
-          />
-          <TextInput
-            placeholderTextColor={'rgb(220, 220, 220)'}
-            placeholder='Email'
-            style={styles.input}
-            autoCapitalize='none'
-            inputMode="email"
-            keyboardType="email-address"
-            autoFocus={false}
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-            }}
-          />
-          <TextInput
-            placeholderTextColor={'rgb(220, 220, 220)'}
-            placeholder='Password'
-            style={styles.input}
-            autoCapitalize='none'
-            secureTextEntry={true}
-            maxLength={12}
-            contextMenuHidden={true}
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-            }}
-          />
-          <TextInput
-            placeholderTextColor={'rgb(220, 220, 220)'}
-            placeholder='Confirm Password'
-            style={styles.input}
-            autoCapitalize='none'
-            secureTextEntry={true}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
-          {error ? <Text style={styles.errorText}>{error}</Text> : <Text style={styles.matchedpass}>{matched}</Text>}
-          {authError ? (
-            <Text style={{
-              color: authError.includes('Account created successfully!') ? '#00FF00' : 'red',
-              marginTop: 20,
-              fontFamily: 'TitilliumWeb_400Regular',
-              textAlign: 'center',
-            }}
-            >
-              {authError}
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          style={({ pressed }) => [
-            {
-              backgroundColor: pressed
-                ? 'rgb(210, 230, 255)'
-                : 'rgb(255, 255, 255)',
-            },
-            styles.signupbutton
-          ]}
-          onPress={pressSignup}
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior='padding'
         >
-          <Text style={styles.signuptext}>SIGN UP</Text>
-        </Pressable>
+          <Image
+            style={styles.logo}
+            source={require('../assets/soclogo.png')}
+          />
+          <View style={styles.inputs}>
+            <TextInput
+              placeholderTextColor={'rgb(200, 200, 200)'}
+              placeholder='Username'
+              style={[styles.input, { marginTop: 0 }]}
+              autoCapitalize='none'
+              autoFocus={true}
+              inputMode="email"
+              keyboardType="email-address"
+              value={username}
+              onChangeText={(text) => {
+                setUsername(text);
+              }}
+            />
+            <TextInput
+              placeholderTextColor={'rgb(220, 220, 220)'}
+              placeholder='Email'
+              style={styles.input}
+              autoCapitalize='none'
+              inputMode="email"
+              keyboardType="email-address"
+              autoFocus={false}
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+              }}
+            />
+            <TextInput
+              placeholderTextColor={'rgb(220, 220, 220)'}
+              placeholder='Password'
+              style={styles.input}
+              autoCapitalize='none'
+              secureTextEntry={true}
+              maxLength={12}
+              contextMenuHidden={true}
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+              }}
+            />
+            <TextInput
+              placeholderTextColor={'rgb(220, 220, 220)'}
+              placeholder='Confirm Password'
+              style={styles.input}
+              autoCapitalize='none'
+              secureTextEntry={true}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+            {error ? <Text style={styles.errorText}>{error}</Text> : <Text style={styles.matchedpass}>{matched}</Text>}
+            {authError ? (
+              <Text style={{
+                color: authError.includes('Account created successfully!') ? '#00FF00' : 'red',
+                marginTop: 20,
+                fontFamily: 'TitilliumWeb_400Regular',
+                textAlign: 'center',
+              }}
+              >
+                {authError}
+              </Text>
+            ) : null}
+          </View>
+          <Pressable
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed
+                  ? 'rgb(210, 230, 255)'
+                  : 'rgb(255, 255, 255)',
+              },
+              styles.signupbutton
+            ]}
+            onPress={pressSignup}
+          >
+            <Text style={styles.signuptext}>SIGN UP</Text>
+          </Pressable>
+        </KeyboardAvoidingView>
       </LinearGradient>
     </View >
   )
@@ -259,7 +278,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   logo: {
-    marginTop: 80,
     width: 250,
     height: 250,
     alignSelf: 'center',

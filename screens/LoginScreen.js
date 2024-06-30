@@ -96,11 +96,8 @@ const LoginScreen = () => {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
-    >
+    <View style={styles.container}>
+
       <LinearGradient
         colors={['#4c669f', '#f0ceff']}
         style={
@@ -108,60 +105,65 @@ const LoginScreen = () => {
         }
         start={[0.5, 0.5]}
       >
-        <Image
-          style={styles.logo}
-          source={require('../assets/soclogo.png')}
-        />
-        <TextInput
-          placeholderTextColor={'rgb(200, 200, 200)'}
-          placeholder='Email'
-          autoCapitalize='none'
-          style={styles.input}
-          autoFocus={true}
-          inputMode='email'
-          value={email}
-          onChangeText={(text) => {
-            setEmail(text);
-          }}
-        />
-        <TextInput
-          placeholderTextColor={'rgb(220, 220, 220)'}
-          placeholder='Password'
-          autoCapitalize='none'
-          style={styles.input}
-          secureTextEntry={true}
-          contextMenuHidden={true}
-          value={password}
-          onChangeText={(text) => {
-            setPassword(text);
-          }}
-        />
-        {authError ? (
-          <Text style={{
-            color: authError.includes('Log in successful') ? '#00FF00' : 'red',
-            marginTop: 20,
-            fontFamily: 'TitilliumWeb_400Regular',
-            textAlign: 'center',
-          }}
-          >
-            {authError}
-          </Text>
-        ) : null}
-        <Pressable
-          style={({ pressed }) => [
-            {
-              backgroundColor: pressed
-                ? 'rgb(210, 230, 255)'
-                : 'rgb(255, 255, 255)',
-            },
-            styles.loginbutton
-          ]}
-          onPress={pressLogin}
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior='padding'
         >
-          <Text style={styles.logintext}>LOG IN</Text>
-        </Pressable>
+          <Image
+            style={styles.logo}
+            source={require('../assets/soclogo.png')}
+          />
+          <TextInput
+            placeholderTextColor={'rgb(200, 200, 200)'}
+            placeholder='Email'
+            autoCapitalize='none'
+            style={styles.input}
+            autoFocus={true}
+            inputMode='email'
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+            }}
+          />
+          <TextInput
+            placeholderTextColor={'rgb(220, 220, 220)'}
+            placeholder='Password'
+            autoCapitalize='none'
+            style={styles.input}
+            secureTextEntry={true}
+            contextMenuHidden={true}
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+            }}
+          />
+          {authError ? (
+            <Text style={{
+              color: authError.includes('Log in successful') ? '#00FF00' : 'red',
+              marginTop: 20,
+              fontFamily: 'TitilliumWeb_400Regular',
+              textAlign: 'center',
+            }}
+            >
+              {authError}
+            </Text>
+          ) : null}
+          <Pressable
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed
+                  ? 'rgb(210, 230, 255)'
+                  : 'rgb(255, 255, 255)',
+              },
+              styles.loginbutton
+            ]}
+            onPress={pressLogin}
+          >
+            <Text style={styles.logintext}>LOG IN</Text>
+          </Pressable>
+        </KeyboardAvoidingView>
       </LinearGradient>
-    </KeyboardAvoidingView>
+    </View>
   )
 }
 
@@ -192,7 +194,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   logo: {
-    marginTop: 150,
     width: 250,
     height: 250,
     alignSelf: 'center',

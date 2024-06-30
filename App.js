@@ -55,4 +55,8 @@ export default function App() {
 //! - navigation handling
 //! - logout warning
 //! - margin / padding top
-//! - configure pin for global storage
+//? - configure pin for global storage 
+
+// AGENDA
+//! Red for Priority
+//? Blue for Secondary

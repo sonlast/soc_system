@@ -21,7 +21,7 @@ const SignUpScreen = ({ navigation }) => {
   const [showRemoveButton, setShowRemoveButton] = useState(false);
   const [showCompletedButton, setShowCompletedButton] = useState(false);
   const [authError, setAuthError] = useState('');
-  const db = getFirestore(app);
+  // const db = getFirestore(app);
 
   useEffect(() => {
     checkBiometricSupport();
