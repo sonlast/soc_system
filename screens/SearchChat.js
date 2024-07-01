@@ -110,24 +110,6 @@ const SearchChat = () => {
         start={[0.5, 0.5]}
       >
         <View style={styles.content}>
-          <View style={styles.header}>
-            <View
-              style={{
-                borderRadius: 50,
-                borderWidth: 2.5,
-                borderColor: 'hsl(0, 0%, 100%)',
-              }}
-            >
-              <Avatar
-                size={48}
-                rounded
-                source={profilePicture ? { uri: profilePicture } : require('../assets/profilepic.jpg')}
-              />
-            </View>
-            <Text style={styles.textheader}>
-              Safe-on-chat
-            </Text>
-          </View>
           <View styles={{
             flexDirection: 'row',
             justifyContent: 'center',
@@ -180,7 +162,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 10,
     paddingBottom: 0,
     padding: 10,
   },

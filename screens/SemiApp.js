@@ -83,7 +83,9 @@ const CustomDrawerContent = (props) => {
           borderRadius: 10,
           padding: 10,
         }}>
-          <FontAwesomeIcon icon={faArrowRightFromBracket} size={20} color="#fff"/>
+          {/* <FontAwesomeIcon icon={faArrowRightFromBracket} size={20} color="#fff"/>
+           */}
+          Log Out
         </Text>
       </Pressable>
     </DrawerContentScrollView>

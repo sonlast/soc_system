@@ -107,11 +107,11 @@ import { app } from '../firebaseConfig';
 
 //! ITEM ITERATE FOR FLATLIST
 const Item = ({ name }) => (
-  <View style={styles.item}>
-    <View>
-      <Text style={styles.title}>{name}</Text>
+    <View style={styles.item}>
+      <View>
+        <Text style={styles.title}>{name}</Text>
+      </View>
     </View>
-  </View>
 );
 
 const chats = [

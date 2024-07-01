@@ -1,5 +1,3 @@
-// App.js
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -13,6 +11,8 @@ import SemiApp from './screens/SemiApp';
 import PinandFingerPrint from './screens/PinandFingerprint';
 import SignUpAuth from './screens/PinandFingerprintSignUp';
 import SearchChat from './screens/SearchChat';
+import ChatScreen from './screens/ChatScreen';
+import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,9 +20,29 @@ const Stack = createNativeStackNavigator();
 const uuid = uuidv4();
 
 export default function App() {
+  let [fontsLoaded, fontError] = useFonts({
+    TitilliumWeb_400Regular,
+    TitilliumWeb_600SemiBold,
+  });
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Load">
+      <Stack.Navigator 
+      initialRouteName="Load"
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#4c669f',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontFamily: 'TitilliumWeb_400Regular',
+        }
+      }}
+      >
         <Stack.Screen name="Load" component={LoadingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Land" component={Landingpage} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
@@ -31,7 +51,7 @@ export default function App() {
         <Stack.Screen name="SemiApp" component={SemiApp} options={{ headerShown: false }} />
         <Stack.Screen name="PinandFingerprint" component={PinandFingerPrint} options={{ headerShown: false }} />
         <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
-        <Stack.Screen name="SearchChat" component={SearchChat} options={{ headerShown: false }} />
+        <Stack.Screen name="SearchChat" component={SearchChat} options={{ title: 'Search Contacts' }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -45,16 +65,16 @@ export default function App() {
 //! Calls (Video/Audio)
 //! Chatroom
 //! Login / Registration Form
-//! Other Security Features 
+//! Other Security Features
 //! Can't Screenshot
 
 //* Modify Algorithm
 
 //! TASKS for Tomorrow
-//! - implement RSA / TwoFish Encryption 
+//! - implement RSA / TwoFish Encryption
 //! - navigation handling
 //! - margin / padding top
-//? - configure pin for global storage 
+//? - configure pin for global storage
 
 // AGENDA
 //! Red for Priority
