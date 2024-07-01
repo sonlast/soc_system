@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Text, View, Image, StyleSheet, Pressable } from 'react-native';
+import { UserProvider, useUser } from './UserContext';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import Chats from './Chats';
@@ -18,6 +19,7 @@ const Drawer = createDrawerNavigator();
 const CustomDrawerContent = (props) => {
   const auth = getAuth();
   const navigator = useNavigation();
+  const { user } = useUser();
 
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
@@ -34,9 +36,10 @@ const CustomDrawerContent = (props) => {
         <View style={styles.drawerHeader}>
           <Image
             style={styles.profilepic}
-            source={require('../assets/profilepic.jpeg')}
+            // source={require('../assets/profilepic.jpg')}
+            source={user && user.profilePicture ? { uri: user.profilePicture } : require('../assets/profilepic.jpg')}
           />
-          <Text style={styles.drawerHeaderText}>Safe-on-chat</Text>
+          {user && <Text style={styles.drawerHeaderText}>{user.username}</Text>}
         </View>
         <DrawerItemList {...props} />
       </View>
@@ -45,7 +48,7 @@ const CustomDrawerContent = (props) => {
           marginBottom: 20,
           paddingVertical: 15,
           paddingHorizontal: 10,
-          backgroundColor: '#f0f0f0',
+          // backgroundColor: '#f0ceff',
           borderRadius: 5,
         }}
         onPress={async () => {
@@ -54,9 +57,13 @@ const CustomDrawerContent = (props) => {
         }}
       >
         <Text style={{
-          fontFamily: 'TitilliumWeb_400Regular',
+          fontFamily: 'TitilliumWeb_600SemiBold',
           fontSize: 16,
-          color: '#333',
+          color: '#fff',
+          backgroundColor: '#ff0000',
+          textAlign: 'center',
+          borderRadius: 10,
+          padding: 10,
         }}>Log Out</Text>
       </Pressable>
     </DrawerContentScrollView>
@@ -86,6 +93,20 @@ const CallsScreen = () => {
         start={[0.5, 0.5]}
       >
         <Calls />
+      </LinearGradient>
+    </View>
+  );
+};
+
+const Settings = () => {
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#4c669f', '#f0ceff']}
+        style={styles.linearGradient}
+        start={[0.5, 0.5]}
+      >
+        <SettingsScreen />
       </LinearGradient>
     </View>
   );
@@ -157,21 +178,41 @@ const DrawerNavigator = () => {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         drawerStyle: {
-          backgroundColor: '#f0f0f0',
-          width: 290,
+          backgroundColor: '#f0ceff',
+          width: 250,
         },
-        drawerType: 'back',
+        drawerType: 'front',
+        drawerLabelStyle: {
+          fontFamily: 'TitilliumWeb_600SemiBold',
+        },
+        gestureEnabled: false,
       }}
     >
-      <Drawer.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
-      <Drawer.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
+      <Drawer.Screen
+        name="Home"
+        component={TabNavigator}
+        options={{
+          headerShown: false,
+          drawerLabel: 'Chats',
+        }}
+      />
+      <Drawer.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          headerShown: false,
+          drawerLabel: 'Settings',
+        }}
+      />
     </Drawer.Navigator>
   );
 };
 
 const App = () => {
   return (
-    <DrawerNavigator />
+    <UserProvider>
+      <DrawerNavigator />
+    </UserProvider>
   );
 };
 

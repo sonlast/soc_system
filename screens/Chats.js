@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -28,7 +28,7 @@ import { app } from '../firebaseConfig';
 //   {
 //     id: '3',
 //     title: 'Kylo Ren',
-//     image: require('../assets/profilepic.jpeg'),
+//     image: require('../assets/profilepic.jpg'),
 //     text: 'You: Pass sa lowkey'
 //   },
 //   {
@@ -106,18 +106,31 @@ import { app } from '../firebaseConfig';
 // ];
 
 //! ITEM ITERATE FOR FLATLIST
-// const Item = ({ title, image, text }) => (
-//   <View style={styles.item}>
-//     <View style={styles.imageContainer}>
-//       <Image source={image} style={styles.image} />
-//       <View style={styles.onlineIndicator}></View>
-//     </View>
-//     <View>
-//       <Text style={styles.title}>{title}</Text>
-//       <Text style={styles.chat}>{text}</Text>
-//     </View>
-//   </View>
-// );
+const Item = ({ name }) => (
+  <View style={styles.item}>
+    <View style={styles.imageContainer}>
+      <View style={styles.onlineIndicator}></View>
+    </View>
+    <View>
+      <Text style={styles.title}>{name}</Text>
+    </View>
+  </View>
+);
+
+const chats = [
+  {
+    id: '1',
+    name: 'Aiah',
+  },
+  {
+    id: '2',
+    name: 'Colet',
+  },
+  {
+    id: '3',
+    name: 'Kylo Ren',
+  },
+]
 
 const Chats = () => {
   const [profilePicture, setProfilePicture] = useState('');
@@ -180,9 +193,10 @@ const Chats = () => {
             style={({ pressed }) => [
               {
                 opacity: pressed ? 0.5 : 1,
-              },{
+              }, {
                 borderRadius: 50,
                 borderWidth: 2.5,
+                borderColor: 'hsl(0, 0%, 100%)',
               }
             ]}
           >
@@ -196,36 +210,24 @@ const Chats = () => {
             Safe-on-chat
           </Text>
         </View>
-        <View style={{
-          flex: 1,
-          marginTop: 125,
-        }}>
-          <Text style={styles.temp_text}>No Conversations Found. </Text>
-          <Text style={styles.temp_text}>Start a New Chat.</Text>
-          <View
-            style={{
-              position: 'absolute',
-              bottom: 10,
-              right: 0,
-              margin: 20,
-              backgroundColor: '#4c669f',
-              borderRadius: 50,
-              padding: 20,
-            }}
-          >
-            <Pressable
-              style={({ pressed }) => [
-                {
-                  opacity: pressed ? 0.5 : 1,
-                }
-              ]}
-              onPress={
-                console.log('CHANGE THIS ONCE THE FUNCTION IS READY.')
-              }>
-              <FontAwesomeIcon icon={faPenToSquare} color="#f0ceff" size={25} style={{ alignContent: 'center' }} />
-            </Pressable>
+        {chats.length === 0 ? (
+
+          <View style={{
+            flex: 1,
+            marginTop: 125,
+          }}>
+            <Text style={styles.temp_text}>No Conversations Found. </Text>
+            <Text style={styles.temp_text}>Start a New Chat.</Text>
           </View>
-        </View>
+        ) : (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={chats}
+            renderItem={({ item }) => <Item name={item.name} />}
+            keyExtractor={item => item.id}
+            style={{ marginTop: 30, paddingBottom: 10 }}
+          />
+        )}
         {/* //! FLATLIST */}
         {/* <FlatList
           showsVerticalScrollIndicator={false}
@@ -234,6 +236,29 @@ const Chats = () => {
           keyExtractor={item => item.id}
           style={{ marginTop: 1.5, paddingBottom: 10 }}
         /> */}
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 10,
+            right: 0,
+            margin: 20,
+            backgroundColor: '#4c669f',
+            borderRadius: 50,
+            padding: 20,
+          }}
+        >
+          <Pressable
+            style={({ pressed }) => [
+              {
+                opacity: pressed ? 0.5 : 1,
+              }
+            ]}
+            onPress={
+              console.log('CHANGE THIS ONCE THE FUNCTION IS READY.')
+            }>
+            <FontAwesomeIcon icon={faPenToSquare} color="#f0ceff" size={25} style={{ alignContent: 'center' }} />
+          </Pressable>
+        </View>
       </View>
     </View>
   )
@@ -273,23 +298,23 @@ const styles = StyleSheet.create({
     fontSize: 25,
     color: '#fff',
     textAlign: 'center',
-  }
+  },
   //!  FOR THE FLATLIST
-  // item: {
-  //   flexDirection: 'row',
-  //   backgroundColor: '#f9c2ff',
-  //   paddingLeft: 10,
-  //   padding: 5,
-  //   marginVertical: 10,
-  //   marginHorizontal: 5,
-  //   borderRadius: 30,
-  // },
-  // title: {
-  //   fontSize: 20,
-  //   fontFamily: 'TitilliumWeb_400Regular',
-  //   paddingLeft: 10,
-  //   textAlignVertical: 'center',
-  // },
+  item: {
+    flexDirection: 'row',
+    backgroundColor: '#f9c2ff',
+    paddingLeft: 10,
+    padding: 5,
+    marginVertical: 10,
+    marginHorizontal: 5,
+    borderRadius: 30,
+  },
+  title: {
+    fontSize: 20,
+    fontFamily: 'TitilliumWeb_400Regular',
+    paddingLeft: 10,
+    textAlignVertical: 'center',
+  },
   // image: {
   //   width: 50,
   //   height: 50,
