@@ -12,6 +12,7 @@ import SettingsScreen from './screens/SettingsScreen';
 import SemiApp from './screens/SemiApp';
 import PinandFingerPrint from './screens/PinandFingerprint';
 import SignUpAuth from './screens/PinandFingerprintSignUp';
+import SearchChat from './screens/SearchChat';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -30,6 +31,7 @@ export default function App() {
         <Stack.Screen name="SemiApp" component={SemiApp} options={{ headerShown: false }} />
         <Stack.Screen name="PinandFingerprint" component={PinandFingerPrint} options={{ headerShown: false }} />
         <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
+        <Stack.Screen name="SearchChat" component={SearchChat} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -51,7 +53,6 @@ export default function App() {
 //! TASKS for Tomorrow
 //! - implement RSA / TwoFish Encryption 
 //! - navigation handling
-//! - logout warning
 //! - margin / padding top
 //? - configure pin for global storage 
 

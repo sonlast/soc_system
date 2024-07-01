@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { SearchBar } from '@rneui/themed';
 import { Avatar } from 'react-native-elements';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
@@ -22,7 +24,7 @@ const calls = [
   // }
 ]
 
-const Calls = () => {
+const SearchChat = () => {
   const [profilePicture, setProfilePicture] = useState('');
   const auth = getAuth(app);
   const firestore = getFirestore(app);
@@ -73,6 +75,11 @@ const Calls = () => {
 
   return (
     <View style={styles.container}>
+      <LinearGradient
+        colors={['#4c669f', '#f0ceff']}
+        style={styles.linearGradient}
+        start={[0.5, 0.5]}
+      >
       <View style={styles.content}>
         <View style={styles.header}>
           <Pressable
@@ -118,6 +125,7 @@ const Calls = () => {
           />
         )}
       </View>
+      </LinearGradient>
     </View>
   )
 }
@@ -137,7 +145,6 @@ const styles = StyleSheet.create({
     fontFamily: 'TitilliumWeb_400Regular',
     fontSize: 25,
     color: 'hsl(0, 0%, 100%)',
-    // marginTop: 6,
     textAlignVertical: 'center',
     marginLeft: 10,
   },
@@ -172,6 +179,9 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     textAlignVertical: 'center',
   },
+  linearGradient: {
+    flex: 1,
+  }
 })
 
-export default Calls;
+export default SearchChat;

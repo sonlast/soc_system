@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { Text, View, Image, StyleSheet, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Text, View, Image, Pressable, StyleSheet, ToastAndroid } from 'react-native';
 import { UserProvider, useUser } from './UserContext';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
@@ -8,7 +8,7 @@ import Calls from './Calls';
 import SettingsScreen from './SettingsScreen';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCommentDots, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faCommentDots, faPhone, faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { getAuth, signOut } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
@@ -20,6 +20,29 @@ const CustomDrawerContent = (props) => {
   const auth = getAuth();
   const navigator = useNavigation();
   const { user } = useUser();
+
+  // Function to handle the actual logout
+  const handleLogout = async () => {
+    Alert.alert(
+      "LOG OUT",
+      "Are you sure you want to log out?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => {
+            ToastAndroid.show("Logout cancelled", ToastAndroid.SHORT);
+          },
+          style: "cancel"
+        },
+        {
+          text: "OK", onPress: async () => {
+            await signOut(auth);
+            navigator.navigate("Land");
+          }
+        }
+      ]
+    )
+  };
 
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
@@ -48,14 +71,9 @@ const CustomDrawerContent = (props) => {
           marginBottom: 20,
           paddingVertical: 15,
           paddingHorizontal: 10,
-          // backgroundColor: '#f0ceff',
           borderRadius: 5,
         }}
-        onPress={async () => {
-          await signOut(auth);
-          navigator.navigate("Land");
-        }}
-      >
+        onPress={handleLogout}>
         <Text style={{
           fontFamily: 'TitilliumWeb_600SemiBold',
           fontSize: 16,
@@ -64,7 +82,9 @@ const CustomDrawerContent = (props) => {
           textAlign: 'center',
           borderRadius: 10,
           padding: 10,
-        }}>Log Out</Text>
+        }}>
+          <FontAwesomeIcon icon={faArrowRightFromBracket} size={20} color="#fff"/>
+        </Text>
       </Pressable>
     </DrawerContentScrollView>
   );

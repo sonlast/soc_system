@@ -108,9 +108,6 @@ import { app } from '../firebaseConfig';
 //! ITEM ITERATE FOR FLATLIST
 const Item = ({ name }) => (
   <View style={styles.item}>
-    <View style={styles.imageContainer}>
-      <View style={styles.onlineIndicator}></View>
-    </View>
     <View>
       <Text style={styles.title}>{name}</Text>
     </View>
@@ -118,18 +115,18 @@ const Item = ({ name }) => (
 );
 
 const chats = [
-  {
-    id: '1',
-    name: 'Aiah',
-  },
-  {
-    id: '2',
-    name: 'Colet',
-  },
-  {
-    id: '3',
-    name: 'Kylo Ren',
-  },
+  // {
+  //   id: '1',
+  //   name: 'Aiah',
+  // },
+  // {
+  //   id: '2',
+  //   name: 'Colet',
+  // },
+  // {
+  //   id: '3',
+  //   name: 'Kylo Ren',
+  // },
 ]
 
 const Chats = () => {
@@ -253,8 +250,9 @@ const Chats = () => {
                 opacity: pressed ? 0.5 : 1,
               }
             ]}
-            onPress={
-              console.log('CHANGE THIS ONCE THE FUNCTION IS READY.')
+            onPress={() => {
+              navigation.navigate("SearchChat")
+            }
             }>
             <FontAwesomeIcon icon={faPenToSquare} color="#f0ceff" size={25} style={{ alignContent: 'center' }} />
           </Pressable>
