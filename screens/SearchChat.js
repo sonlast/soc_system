@@ -6,28 +6,52 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SearchBar } from '@rneui/themed';
 import { Avatar } from 'react-native-elements';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 
-const Item = ({ name }) => (
+const Item = ({ name, profilePicture }) => (
   <View style={styles.item}>
-    <View>
-      <Text style={styles.title}>{name}</Text>
+    <View style={{
+      flexDirection: 'row',
+      paddingVertical: 2.5,
+      paddingHorizontal: 5,
+    }}>
+      <View>
+        <Avatar size={48} rounded source={profilePicture ? { uri: profilePicture } : require('../assets/profilepic.jpg')} />
+      </View>
+      <View>
+        <Text style={{
+          fontFamily: 'TitilliumWeb_400Regular',
+          fontSize: 20,
+          paddingLeft: 10,
+          paddingVertical: 10,
+          textAlignVertical: 'center', 
+        }}>{name}</Text>
+      </View>
     </View>
   </View>
 );
 
-const calls = [
-  // {
-  //   id: '1',
-  //   name: 'John Doe',
-  // }
-]
-
 const SearchChat = () => {
   const [profilePicture, setProfilePicture] = useState('');
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const auth = getAuth(app);
   const firestore = getFirestore(app);
+  const navigation = useNavigation();
+  const [userInput, setUserInput] = useState('');
+
+  const fetchUsers = async () => {
+    try {
+      const usersCollection = collection(firestore, 'users');
+      const userSnapshot = await getDocs(usersCollection);
+      const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUsers(userList);
+      setFilteredUsers(userList);
+    } catch (error) {
+      console.error('Error fetching users: ', error);
+    }
+  };
 
   const fetchProfilePicture = async () => {
     try {
@@ -49,6 +73,7 @@ const SearchChat = () => {
 
   useEffect(() => {
     fetchProfilePicture();
+    fetchUsers();
     const backAction = () => {
       navigation.navigate("Chats");
       return true;
@@ -62,12 +87,16 @@ const SearchChat = () => {
     return () => backHandler.remove();
   }, []);
 
+  useEffect(() => {
+    setFilteredUsers(
+      users.filter(user => user.username.toLowerCase().includes(userInput.toLowerCase()))
+    );
+  }, [userInput, users]);
+
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
     TitilliumWeb_600SemiBold,
   });
-
-  const navigation = useNavigation();
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -80,51 +109,65 @@ const SearchChat = () => {
         style={styles.linearGradient}
         start={[0.5, 0.5]}
       >
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => {
-              navigation.openDrawer();
-            }}
-            style={({ pressed }) => [
-              {
-                opacity: pressed ? 0.5 : 1,
-              }, {
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <View
+              style={{
                 borderRadius: 50,
                 borderWidth: 2.5,
                 borderColor: 'hsl(0, 0%, 100%)',
-              }
-            ]}
-          >
-            <Avatar
-              size={48}
-              rounded
-              source={profilePicture ? { uri: profilePicture } : require('../assets/profilepic.jpg')}
-            />
-          </Pressable>
-          <Text style={styles.textheader}>
-            Safe-on-chat
-          </Text>
-        </View>
-        { calls.length === 0 ? (
-
-          <View style={{
-            flex: 1,
-            marginTop: 125,
+              }}
+            >
+              <Avatar
+                size={48}
+                rounded
+                source={profilePicture ? { uri: profilePicture } : require('../assets/profilepic.jpg')}
+              />
+            </View>
+            <Text style={styles.textheader}>
+              Safe-on-chat
+            </Text>
+          </View>
+          <View styles={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            margin: 50,
           }}>
-          <Text style={styles.temp_text}>Your Call History Is Empty. </Text>
-          <Text style={styles.temp_text}>Initiate Your First Call. </Text>
+            <SearchBar
+              round
+              searchIcon={{ size: 24 }}
+              placeholder="Search"
+              onChangeText={(text) => setUserInput(text)}
+              value={userInput}
+              containerStyle={{
+                backgroundColor: 'transparent',
+                borderBottomWidth: 0,
+                borderTopWidth: 0,
+              }}
+              inputStyle={{
+                fontFamily: 'TitilliumWeb_400Regular',
+              }}
+              underlineColorAndroid={'transparent'}
+            />
+          </View>
+          {filteredUsers.length === 0 ? (
+            <View style={{
+              flex: 1,
+              marginTop: 125,
+            }}>
+              <Text style={styles.temp_text}>No Results Available. </Text>
+            </View>
+          ) : (
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              data={filteredUsers}
+              renderItem={({ item }) => <Item name={item.username} profilePicture={item.profilePicture} />}
+              keyExtractor={item => item.id}
+              style={{ marginTop: 10, paddingBottom: 10 }}
+            />
+          )}
         </View>
-        ) : (
-          <FlatList
-            showsVerticalScrollIndicator={false}
-            data={calls}
-            renderItem={({ item }) => <Item name={item.name} />}
-            keyExtractor={item => item.id}
-            style={{ marginTop: 30, paddingBottom: 10 }}
-          />
-        )}
-      </View>
       </LinearGradient>
     </View>
   )
@@ -168,10 +211,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#f9c2ff',
     paddingLeft: 10,
-    padding: 5,
+    padding: 10,
     marginVertical: 10,
-    marginHorizontal: 5,
-    borderRadius: 30,
+    marginHorizontal: 10,
+    borderRadius: 10,
   },
   title: {
     fontSize: 20,
