@@ -6,7 +6,6 @@ import Landingpage from './screens/Landingpage';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import SettingsScreen from './screens/SettingsScreen';
-// import HomeScreen from './screens/HomeScreen';
 import SemiApp from './screens/SemiApp';
 import PinandFingerPrint from './screens/PinandFingerprint';
 import SignUpAuth from './screens/PinandFingerprintSignUp';
@@ -51,6 +50,7 @@ export default function App() {
         <Stack.Screen name="SemiApp" component={SemiApp} options={{ headerShown: false }} />
         <Stack.Screen name="PinandFingerprint" component={PinandFingerPrint} options={{ headerShown: false }} />
         <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
+        <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="SearchChat" component={SearchChat} options={{ title: 'Search Contacts' }}/>
       </Stack.Navigator>
     </NavigationContainer>

@@ -9,7 +9,8 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 
-const Item = ({ name, profilePicture }) => (
+const Item = ({ user, onPress }) => (
+  <Pressable onPress={() => onPress(user)}>
   <View style={styles.item}>
     <View style={{
       flexDirection: 'row',
@@ -17,7 +18,7 @@ const Item = ({ name, profilePicture }) => (
       paddingHorizontal: 5,
     }}>
       <View>
-        <Avatar size={48} rounded source={profilePicture ? { uri: profilePicture } : require('../assets/profilepic.jpg')} />
+        <Avatar size={48} rounded source={user.profilePicture ? { uri: user.profilePicture } : require('../assets/profilepic.jpg')} />
       </View>
       <View>
         <Text style={{
@@ -26,10 +27,11 @@ const Item = ({ name, profilePicture }) => (
           paddingLeft: 10,
           paddingVertical: 10,
           textAlignVertical: 'center', 
-        }}>{name}</Text>
+        }}>{user.username}</Text>
       </View>
     </View>
   </View>
+  </Pressable>
 );
 
 const SearchChat = () => {
@@ -93,6 +95,10 @@ const SearchChat = () => {
     );
   }, [userInput, users]);
 
+  const handleUserPress = (user) => {
+    navigation.navigate('ChatScreen', {user});
+  };
+
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
     TitilliumWeb_600SemiBold,
@@ -144,7 +150,7 @@ const SearchChat = () => {
             <FlatList
               showsVerticalScrollIndicator={false}
               data={filteredUsers}
-              renderItem={({ item }) => <Item name={item.username} profilePicture={item.profilePicture} />}
+              renderItem={({ item }) => <Item user={item} onPress={handleUserPress}/>}
               keyExtractor={item => item.id}
               style={{ marginTop: 10, paddingBottom: 10 }}
             />
