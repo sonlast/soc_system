@@ -96,7 +96,12 @@ const SearchChat = () => {
   }, [userInput, users]);
 
   const handleUserPress = (user) => {
-    navigation.navigate('ChatScreen', {user});
+    if (user.uid) {
+
+      navigation.navigate('ChatScreen', {user, username: user.username, profilePicture: user.profilePicture, uid: user.uid});
+    } else { 
+      console.error('User does not have a valid UID');
+    }
   };
 
   let [fontsLoaded, fontError] = useFonts({

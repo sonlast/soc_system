@@ -50,7 +50,7 @@ export default function App() {
         <Stack.Screen name="SemiApp" component={SemiApp} options={{ headerShown: false }} />
         <Stack.Screen name="PinandFingerprint" component={PinandFingerPrint} options={{ headerShown: false }} />
         <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
-        <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true }}/>
         <Stack.Screen name="SearchChat" component={SearchChat} options={{ title: 'Search Contacts' }}/>
       </Stack.Navigator>
     </NavigationContainer>

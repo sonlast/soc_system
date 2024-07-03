@@ -51,6 +51,10 @@ const RegisterScreen = () => {
 
   const pressSignup = async () => {
     const formattedUsername = username.startsWith('@') ? username : `@${username}`;
+    if (!image) {
+      setError('Profile picture is required');
+      return;
+    }
     if (!username.trim()) {
       setError('Username is required');
       return;
@@ -94,6 +98,7 @@ const RegisterScreen = () => {
       
       const userDoc = doc(firestore, "users", user.uid);
       await setDoc(userDoc, {
+        uid: user.uid,
         username: formattedUsername,
         email: email,
         profilePicture: imageUrl,
