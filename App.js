@@ -61,21 +61,37 @@ export default function App() {
 
 //! FEATURES
 //! Sending Attachments (other file types)
-//! No SQL
+//* No SQL
 //! Calls (Video/Audio)
-//! Chatroom
-//! Login / Registration Form
+//* Chatroom
+//* Login / Registration Form
 //! Other Security Features
+      //! PIN
+      //! Fingerprint
+      //! Twofish / RSA Encryption
 //! Can't Screenshot
 
 //* Modify Algorithm
 
+//! THESIS FEATURES
+//* Real-time chat
+//TODO: File send
+//TODO: Group chats
+//TODO: Voice Message
+//TODO: Video Message
+//TODO: Picture
+//TODO: Data Encryption
+//TODO: Multimedia
+
+
 //! TASKS for Tomorrow
 //! - implement RSA / TwoFish Encryption
-//! - navigation handling
 //! - margin / padding top
+//! - enhance ui chatscreen design
+//? - navigation handling
 //? - configure pin for global storage
 
 // AGENDA
 //! Red for Priority
+//TODO: Orange for Secondary
 //? Blue for Secondary
