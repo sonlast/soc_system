@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import { BackHandler } from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { TouchableOpacity, BackHandler, Image, Text, View, StyleSheet } from 'react-native';
+import { TextInput, Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send } from 'react-native-gifted-chat';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
 import { useRoute } from '@react-navigation/native';
 import { app } from '../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -32,8 +34,10 @@ const ChatScreen = () => {
   }, []);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: username });
-    
+    navigation.setOptions({
+      headerTitle: () => <HeaderWithPicture username={username} profilePicture={profilePicture} />,
+    });
+
     if (auth.currentUser && user && user.uid) {
       const q = query(
         collection(firestore, 'chats'),
@@ -51,7 +55,7 @@ const ChatScreen = () => {
             user: {
               _id: data.user._id,
               name: username,
-              avatar: profilePicture, // Ensure the avatar URL is included
+              avatar: profilePicture,
             },
           };
         });
@@ -69,7 +73,7 @@ const ChatScreen = () => {
   useLayoutEffect(() => {
     if (auth.currentUser && user && user.uid) {
       const typingDocRef = doc(firestore, 'typingStatus', participantIds);
-      
+
       const unsubscribe = onSnapshot(typingDocRef, (doc) => {
         const data = doc.data();
         if (data) {
@@ -117,7 +121,7 @@ const ChatScreen = () => {
       console.error('Error sending message: ', error);
     }
   }, [auth.currentUser.uid, user.uid, firestore, participantIds]);
-  
+
   const handleInputTextChanged = async (text) => {
     const typingDocRef = doc(firestore, 'typingStatus', participantIds);
 
@@ -134,6 +138,96 @@ const ChatScreen = () => {
     }
   };
 
+  const HeaderWithPicture = ({ username, profilePicture }) => {
+    return (
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}>
+        <Image source={{ uri: profilePicture }} style={{
+          width: 45,
+          height: 45,
+          borderRadius: 25,
+          marginRight: 10,
+        }} />
+        <Text style={{
+          color: '#fff',
+          fontSize: 20,
+          fontFamily: 'TitilliumWeb_600SemiBold',
+        }}>{username}</Text>
+      </View>
+    );
+  };
+
+  const CustomMessageText = (props) => {
+    return (
+      <MessageText
+        {...props}
+        textStyle={{
+          left: [styles.text, styles.textLeft],
+          right: [styles.text, styles.textRight],
+        }}
+      />
+    );
+  };
+
+  const CustomBubble = (props) => {
+    return (
+      <View>
+        <Bubble
+          {...props}
+          wrapperStyle={{
+            right: {
+              backgroundColor: '#4c669f',
+            },
+            left: {
+              backgroundColor: '#f0ceff',
+            },
+          }}
+        />
+      </View>
+    );
+  };
+
+  const CustomInputToolbar = (props) => {
+    return (
+      <InputToolbar
+        {...props}
+        containerStyle={{
+          backgroundColor: '#4c669f',
+          maxHeight: 60,
+          overflow: 'hidden',
+        }}
+        renderComposer={(composerprops) => (
+          <Composer
+            {...composerprops}
+            textInputStyle={{
+              color: '#fff',
+              fontFamily: 'TitilliumWeb_400Regular',
+              flex: 1,
+              multiline: true,
+            }}
+            placeholderTextColor='#fff'
+          />
+        )
+        }
+      />
+    );
+  }
+
+  const renderSend = (props) => {
+    return (
+      <Send {...props}>
+        <View style={{
+          marginRight: 20,
+          marginBottom: 10,
+        }}>
+          <FontAwesomeIcon icon={faPaperPlane} size={20} color='white' />
+        </View>
+      </Send>
+    );
+  }
+
   return (
     <GiftedChat
       messages={messages}
@@ -143,27 +237,27 @@ const ChatScreen = () => {
         name: username,
         avatar: profilePicture || './assets/profilepic.jpg',
       }}
-      renderBubble={
-        (props) => {
-          return (
-            <Bubble
-              {...props}
-              wrapperStyle={{
-                right: {
-                  backgroundColor: '#4c669f',
-                },
-                left: {
-                  backgroundColor: '#f0ceff',
-                },
-              }}
-            />
-          );
-        }
-      }
+      renderBubble={CustomBubble}
       isTyping={isTyping}
       onInputTextChanged={handleInputTextChanged}
+      renderMessageText={CustomMessageText}
+      renderInputToolbar={CustomInputToolbar}
+      renderAvatarOnTop={true}
+      renderSend={renderSend}
     />
   );
 };
+
+const styles = StyleSheet.create({
+  text: {
+    fontFamily: 'TitilliumWeb_400Regular'
+  },
+  textLeft: {
+    color: '#000', // Text color for received messages
+  },
+  textRight: {
+    color: '#fff', // Text color for sent messages
+  },
+})
 
 export default ChatScreen;
