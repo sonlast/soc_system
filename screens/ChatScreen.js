@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import { BackHandler, Image, Text, View, StyleSheet } from 'react-native';
+import { BackHandler, Image, Text, View, StyleSheet, Pressable } from 'react-native';
 import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send } from 'react-native-gifted-chat';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
@@ -7,7 +7,9 @@ import { useRoute } from '@react-navigation/native';
 import { app } from '../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faPaperclip, faImage, faVideo, faPhone } from '@fortawesome/free-solid-svg-icons';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -77,7 +79,7 @@ const ChatScreen = () => {
       const unsubscribe = onSnapshot(typingDocRef, (doc) => {
         const data = doc.data();
         if (data) {
-          setIsTyping(data.typing && data.typing !== auth.currentUser.uid);
+          setIsTyping(!!data.typing && data.typing !== auth.currentUser.uid);
         }
       });
 
@@ -138,11 +140,43 @@ const ChatScreen = () => {
     }
   };
 
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.cancelled) {
+        console.log('Image picked:', result.uri);
+        // Handle sending the image as a message here
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+    }
+  };
+
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync();
+
+      if (result.type === 'success') {
+        console.log('Document picked:', result.uri);
+        // Handle sending the document as a message here
+      }
+    } catch (error) {
+      console.error('Error picking document:', error);
+    }
+  };
+
   const HeaderWithPicture = ({ username, profilePicture }) => {
     return (
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',
+        width: '100%',
+        position: 'relative',
       }}>
         <Image source={{ uri: profilePicture }} style={{
           width: 45,
@@ -155,6 +189,24 @@ const ChatScreen = () => {
           fontSize: 20,
           fontFamily: 'TitilliumWeb_600SemiBold',
         }}>{username}</Text>
+        <FontAwesomeIcon
+          icon={faPhone}
+          size={21}
+          color='#fff'
+          style={{
+            position: 'absolute',
+            right: 140,
+          }}
+        />
+        <FontAwesomeIcon
+          icon={faVideo}
+          size={25}
+          color='#fff'
+          style={{
+            position: 'absolute',
+            right: 90,
+          }}
+        />
       </View>
     );
   };
@@ -199,16 +251,34 @@ const ChatScreen = () => {
           overflow: 'hidden',
         }}
         renderComposer={(composerprops) => (
-          <Composer
-            {...composerprops}
-            textInputStyle={{
-              color: '#fff',
-              fontFamily: 'TitilliumWeb_400Regular',
-              flex: 1,
-              multiline: true,
-            }}
-            placeholderTextColor='#fff'
-          />
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}>
+            <Pressable
+              onPress={pickImage}
+              style={{
+                marginRight: 10,
+              }}
+            >
+              <FontAwesomeIcon icon={faImage} size={20} color='white' />
+            </Pressable>
+            <Pressable
+              onPress={pickDocument}
+              style={{
+                marginRight: 10,
+              }}
+            >
+              <FontAwesomeIcon icon={faPaperclip} size={20} color='white' />
+            </Pressable>
+            <Composer
+              {...composerprops}
+              textInputStyle={{
+                color: '#fff',
+                fontFamily: 'TitilliumWeb_400Regular',
+                flex: 1,
+                multiline: true,
+              }}
+              placeholderTextColor='#fff'
+            />
+          </View>
         )
         }
       />

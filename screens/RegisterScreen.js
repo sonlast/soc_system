@@ -50,7 +50,7 @@ const RegisterScreen = () => {
   };
 
   const pressSignup = async () => {
-    const formattedUsername = username.startsWith('@') ? username : `@${username}`;
+    const formattedUsername = username.trim().charAt(0).toUpperCase() + username.slice(1);
     if (!image) {
       setError('Profile picture is required');
       return;
