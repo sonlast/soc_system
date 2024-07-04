@@ -6,13 +6,148 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { Avatar } from 'react-native-elements';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
+
+//? OPTIONS --> faPen, faUserGroup, faPlus
+
+//! DATA FOR FLATLIST
+// const data = [
+//   {
+//     id: '1',
+//     title: 'Aiah Arceta',
+//     image: require('../assets/bini/aiah.jpg'),
+//     text: 'Aiah: Rinig nyo po kami po?'
+//   },
+//   {
+//     id: '2',
+//     title: 'Colet Vergara',
+//     image: require('../assets/bini/colet.jpg'),
+//     text: 'Colet: Ba\'t mo natanong??'
+//   },
+//   {
+//     id: '3',
+//     title: 'Kylo Ren',
+//     image: require('../assets/profilepic.jpg'),
+//     text: 'You: Pass sa lowkey'
+//   },
+//   {
+//     id: '4',
+//     title: 'Maloi Ricalde',
+//     image: require('../assets/bini/maloi.jpg'),
+//     text: 'Maloi: Kabargas naman nyan ayy'
+//   },
+//   {
+//     id: '5',
+//     title: 'AJ Yape',
+//     image: require('../assets/bini/aj.jpg'),
+//     text: 'AJ sent you an image.'
+//   },
+//   {
+//     id: '6',
+//     title: 'Princess Torres',
+//     image: require('../assets/bini/cess.jpg'),
+//     text: 'Princess sent you an emoji. '
+//   },
+//   {
+//     id: '7',
+//     title: 'Gwen Apuli',
+//     image: require('../assets/bini/gwen.jpg'),
+//     text: 'Gwen: si Sheena?'
+//   },
+//   {
+//     id: '8',
+//     title: 'Stacey Sevilleja',
+//     image: require('../assets/bini/stacey.jpg'),
+//     text: 'Stacey changed her nickname into Princess <3.'
+//   },
+//   {
+//     id: '9',
+//     title: 'Alfea Zulueta',
+//     image: require('../assets/bini/alf.jpg'),
+//     text: 'Alfea sent you a voice message.'
+//   },
+//   {
+//     id: '10',
+//     title: 'Mikha Lim',
+//     image: require('../assets/bini/mikha.jpg'),
+//     text: 'Mikha: Ba\'t kasi nagpagas pa?'
+//   },
+//   {
+//     id: '11',
+//     title: 'Nicole Torres',
+//     image: require('../assets/bini/nics.jpg'),
+//     text: 'Nicole unsent a message.'
+//   },
+//   {
+//     id: '12',
+//     title: 'Jhoanna Robles',
+//     image: require('../assets/bini/jho.jpg'),
+//     text: 'Jhoanna: HAHAHAHAHHH'
+//   },
+//   {
+//     id: '13',
+//     title: 'Klaus Lastimosa',
+//     image: require('../assets/bini/klaus.jpg'),
+//     text: 'Klaus tagged you in his story.'
+//   },
+//   {
+//     id: '14',
+//     title: 'Sheena Catacutan',
+//     image: require('../assets/bini/sheena.jpg'),
+//     text: 'Sheena: PUFFERFISHHHHHHHHHHHHH'
+//   },
+//   {
+//     id: '15',
+//     title: 'Jazmine Henry',
+//     image: require('../assets/bini/jaz.jpg'),
+//     text: 'Jazmine: Malambot na byahe? HAHA'
+//   },
+// ];
+
+//! ITEM ITERATE FOR FLATLIST
+const Item = ({ name }) => (
+    <View style={styles.item}>
+      <View>
+        <Text style={styles.title}>{name}</Text>
+      </View>
+    </View>
+);
+
+const chats = [
+  // {
+  //   id: '1',
+  //   name: 'Aiah',
+  // },
+  // {
+  //   id: '2',
+  //   name: 'Colet',
+  // },
+  // {
+  //   id: '3',
+  //   name: 'Kylo Ren',
+  // },
+]
 
 const Chats = () => {
   const [profilePicture, setProfilePicture] = useState('');
   const auth = getAuth(app);
   const firestore = getFirestore(app);
+  const [userInput, setUserInput] = useState('');
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+
+  const fetchUsers = async () => {
+    try {
+      const usersCollection = collection(firestore, 'users');
+      const userSnapshot = await getDocs(usersCollection);
+      const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUsers(userList);
+      setFilteredUsers(userList);
+    } catch (error) {
+      console.error('Error fetching users: ', error);
+    }
+  };
 
   const fetchProfilePicture = async () => {
     try {
@@ -35,6 +170,7 @@ const Chats = () => {
   useFocusEffect(
     useCallback(() => {
       fetchProfilePicture();
+      fetchUsers();
       const onBackPress = () => {
         BackHandler.exitApp();
         return true;
@@ -47,7 +183,22 @@ const Chats = () => {
     }, [])
   );
 
+  useEffect(() => {
+    setFilteredUsers(
+      users.filter(user => user.username.toLowerCase().includes(userInput.toLowerCase()))
+    );
+  }, [userInput, users]);
+
   const navigation = useNavigation();
+
+  const handleUserPress = (user) => {
+    if (user.uid) {
+
+      navigation.navigate('ChatScreen', {user, username: user.username, profilePicture: user.profilePicture, uid: user.uid});
+    } else { 
+      console.error('User does not have a valid UID');
+    }
+  };
 
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
@@ -87,6 +238,32 @@ const Chats = () => {
             Safe-on-chat
           </Text>
         </View>
+        {chats.length === 0 ? (
+
+          <View style={{
+            flex: 1,
+            marginTop: 125,
+          }}>
+            <Text style={styles.temp_text}>No Conversations Found. </Text>
+            <Text style={styles.temp_text}>Start a New Chat.</Text>
+          </View>
+        ) : (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={chats}
+            renderItem={({ item }) => <Item name={item.name} />}
+            keyExtractor={item => item.id}
+            style={{ marginTop: 30, paddingBottom: 10 }}
+          />
+        )}
+        {/* //! FLATLIST */}
+        {/* <FlatList
+          showsVerticalScrollIndicator={false}
+          data={data}
+          renderItem={({ item }) => <Item image={item.image} title={item.title} text={item.text} />}
+          keyExtractor={item => item.id}
+          style={{ marginTop: 1.5, paddingBottom: 10 }}
+        /> */}
         <View
           style={{
             position: 'absolute',
