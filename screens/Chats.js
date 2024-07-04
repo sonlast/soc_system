@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react'
-import { BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import React, { useState, useCallback } from 'react'
+import { BackHandler, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
