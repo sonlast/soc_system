@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import { TouchableOpacity, BackHandler, Image, Text, View, StyleSheet } from 'react-native';
-import { TextInput, Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send } from 'react-native-gifted-chat';
+import { BackHandler, Image, Text, View, StyleSheet } from 'react-native';
+import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send } from 'react-native-gifted-chat';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
 import { useRoute } from '@react-navigation/native';
