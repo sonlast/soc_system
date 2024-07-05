@@ -89,31 +89,36 @@ const ChatScreen = () => {
     }
   }, [firestore, auth.currentUser, user, participantIds]);
 
-  const onSend = useCallback(async (messages = []) => {
+  const onSend = useCallback(async (messages = [], fileURL = null, fileType = null) => {
     const message = messages[0];
-    // console.log('Message to send:', message);
-
-    if (!message || !message._id || !message.createdAt || !message.text || !message.user) {
+  
+    if (!message || !message._id || !message.createdAt || !message.user) {
       console.error('Invalid message format:', message);
       return;
     }
-
+  
     const { _id, createdAt, text, user: sender } = message;
-
+  
     if (!auth.currentUser.uid || !user.uid) {
       console.error('Either the current user or the chat participant does not have a valid UID');
       return;
     }
-
+  
     try {
-      await addDoc(collection(firestore, 'chats'), {
+      const messageData = {
         _id,
         createdAt: new Date(),
-        text,
-        // user: sender,
+        text: fileURL ? '' : text,
         user: sender,
         participants: participantIds,
-      });
+      };
+  
+      if (fileURL) {
+        messageData.file = fileURL;
+        messageData.fileType = fileType;
+      }
+  
+      await addDoc(collection(firestore, 'chats'), messageData);
       console.log('Message sent successfully!');
       await updateDoc(doc(firestore, 'typingStatus', participantIds), {
         typing: '',
@@ -139,6 +144,18 @@ const ChatScreen = () => {
       });
     }
   };
+  
+  const uploadFile = async (uri, fileType) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storage = getStorage(app);
+    const fileRef = ref(storage, `${fileType}/${new Date().getTime()}_${auth.currentUser.uid}`);
+    
+    await uploadBytes(fileRef, blob);
+    const downloadURL = await getDownloadURL(fileRef);
+    
+    return downloadURL;
+  };
 
   const pickImage = async () => {
     try {
@@ -147,28 +164,51 @@ const ChatScreen = () => {
         allowsEditing: true,
         quality: 1,
       });
-
+  
       if (!result.cancelled) {
         console.log('Image picked:', result.uri);
-        // Handle sending the image as a message here
+        const fileURL = await uploadFile(result.uri, 'images');
+        const message = {
+          _id: new Date().getTime().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth.currentUser.uid,
+            name: username,
+            avatar: profilePicture || './assets/profilepic.jpg',
+          },
+          text: '',
+        };
+        onSend([message], fileURL, 'image');
       }
     } catch (error) {
       console.error('Error picking image:', error);
     }
   };
-
+  
   const pickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync();
-
+  
       if (result.type === 'success') {
         console.log('Document picked:', result.uri);
-        // Handle sending the document as a message here
+        const fileURL = await uploadFile(result.uri, 'documents');
+        const message = {
+          _id: new Date().getTime().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth.currentUser.uid,
+            name: username,
+            avatar: profilePicture || './assets/profilepic.jpg',
+          },
+          text: '',
+        };
+        onSend([message], fileURL, 'document');
       }
     } catch (error) {
       console.error('Error picking document:', error);
     }
   };
+  
 
   const HeaderWithPicture = ({ username, profilePicture }) => {
     return (
@@ -237,6 +277,24 @@ const ChatScreen = () => {
             },
           }}
         />
+        {props.currentMessage.fileType === 'image' && (
+        <Image
+          source={{ uri: props.currentMessage.file }}
+          style={{ width: 200, height: 200, borderRadius: 10, marginTop: 5 }}
+        />
+      )}
+      {props.currentMessage.fileType === 'document' && (
+        <Text
+          style={{
+            color: '#0000EE',
+            textDecorationLine: 'underline',
+            marginTop: 5,
+          }}
+          onPress={() => Linking.openURL(props.currentMessage.file)}
+        >
+          Open Document
+        </Text>
+      )}
       </View>
     );
   };
