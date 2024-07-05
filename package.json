@@ -40,6 +40,7 @@
     "expo-linear-gradient": "~13.0.2",
     "expo-local-authentication": "~14.0.1",
     "expo-random": "^14.0.1",
+    "expo-screen-capture": "^6.0.1",
     "expo-status-bar": "~1.12.1",
     "firebase": "^10.12.2",
     "react": "18.2.0",
