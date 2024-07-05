@@ -3,6 +3,7 @@ import { BackHandler, Image, Text, View, StyleSheet, Pressable } from 'react-nat
 import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send } from 'react-native-gifted-chat';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRoute } from '@react-navigation/native';
 import { app } from '../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
@@ -10,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane, faPaperclip, faImage, faVideo, faPhone } from '@fortawesome/free-solid-svg-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { State } from 'react-native-gesture-handler';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -34,7 +36,7 @@ const ChatScreen = () => {
 
     return () => backHandler.remove();
   }, []);
-
+  
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => <HeaderWithPicture username={username} profilePicture={profilePicture} />,
@@ -89,35 +91,48 @@ const ChatScreen = () => {
     }
   }, [firestore, auth.currentUser, user, participantIds]);
 
+  const uploadFile = async (uri, fileType) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storage = getStorage(app);
+    const fileRef = ref(storage, `${fileType}/${new Date().getTime()}_${auth.currentUser.uid}`);
+
+    await uploadBytes(fileRef, blob);
+    const downloadURL = await getDownloadURL(fileRef);
+
+    return downloadURL;
+  }
+
   const onSend = useCallback(async (messages = [], fileURL = null, fileType = null) => {
     const message = messages[0];
-  
-    if (!message || !message._id || !message.createdAt || !message.user) {
+    // console.log('Message to send:', message);
+
+    if (!message || !message._id || !message.createdAt || !message.text || !message.user) {
       console.error('Invalid message format:', message);
       return;
     }
-  
+
     const { _id, createdAt, text, user: sender } = message;
-  
+
     if (!auth.currentUser.uid || !user.uid) {
       console.error('Either the current user or the chat participant does not have a valid UID');
       return;
     }
-  
+
     try {
       const messageData = {
         _id,
         createdAt: new Date(),
-        text: fileURL ? '' : text,
+        text: fileUrl ? '' : text,
         user: sender,
         participants: participantIds,
-      };
-  
-      if (fileURL) {
+      }
+
+      if (fileUrl) {
         messageData.file = fileURL;
         messageData.fileType = fileType;
       }
-  
+
       await addDoc(collection(firestore, 'chats'), messageData);
       console.log('Message sent successfully!');
       await updateDoc(doc(firestore, 'typingStatus', participantIds), {
@@ -144,18 +159,6 @@ const ChatScreen = () => {
       });
     }
   };
-  
-  const uploadFile = async (uri, fileType) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const storage = getStorage(app);
-    const fileRef = ref(storage, `${fileType}/${new Date().getTime()}_${auth.currentUser.uid}`);
-    
-    await uploadBytes(fileRef, blob);
-    const downloadURL = await getDownloadURL(fileRef);
-    
-    return downloadURL;
-  };
 
   const pickImage = async () => {
     try {
@@ -164,8 +167,8 @@ const ChatScreen = () => {
         allowsEditing: true,
         quality: 1,
       });
-  
-      if (!result.cancelled) {
+
+      if (!result.canceled) {
         console.log('Image picked:', result.uri);
         const fileURL = await uploadFile(result.uri, 'images');
         const message = {
@@ -178,23 +181,23 @@ const ChatScreen = () => {
           },
           text: '',
         };
-        onSend([message], fileURL, 'image');
+        onSend([message], fileURL, 'image')
       }
     } catch (error) {
       console.error('Error picking image:', error);
     }
   };
-  
+
   const pickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync();
-  
+
       if (result.type === 'success') {
         console.log('Document picked:', result.uri);
         const fileURL = await uploadFile(result.uri, 'documents');
         const message = {
           _id: new Date().getTime().toString(),
-          createdAt: new Date(),
+          creadedAt: new Date(),
           user: {
             _id: auth.currentUser.uid,
             name: username,
@@ -208,7 +211,6 @@ const ChatScreen = () => {
       console.error('Error picking document:', error);
     }
   };
-  
 
   const HeaderWithPicture = ({ username, profilePicture }) => {
     return (
