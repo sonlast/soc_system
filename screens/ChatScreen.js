@@ -3,7 +3,6 @@ import { BackHandler, Image, Text, View, StyleSheet, Pressable } from 'react-nat
 import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send } from 'react-native-gifted-chat';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRoute } from '@react-navigation/native';
 import { app } from '../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
@@ -11,7 +10,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane, faPaperclip, faImage, faVideo, faPhone } from '@fortawesome/free-solid-svg-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { State } from 'react-native-gesture-handler';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -36,7 +34,7 @@ const ChatScreen = () => {
 
     return () => backHandler.remove();
   }, []);
-  
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => <HeaderWithPicture username={username} profilePicture={profilePicture} />,
@@ -91,19 +89,7 @@ const ChatScreen = () => {
     }
   }, [firestore, auth.currentUser, user, participantIds]);
 
-  const uploadFile = async (uri, fileType) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const storage = getStorage(app);
-    const fileRef = ref(storage, `${fileType}/${new Date().getTime()}_${auth.currentUser.uid}`);
-
-    await uploadBytes(fileRef, blob);
-    const downloadURL = await getDownloadURL(fileRef);
-
-    return downloadURL;
-  }
-
-  const onSend = useCallback(async (messages = [], fileURL = null, fileType = null) => {
+  const onSend = useCallback(async (messages = []) => {
     const message = messages[0];
     // console.log('Message to send:', message);
 
@@ -120,20 +106,14 @@ const ChatScreen = () => {
     }
 
     try {
-      const messageData = {
+      await addDoc(collection(firestore, 'chats'), {
         _id,
         createdAt: new Date(),
-        text: fileUrl ? '' : text,
+        text,
+        // user: sender,
         user: sender,
         participants: participantIds,
-      }
-
-      if (fileUrl) {
-        messageData.file = fileURL;
-        messageData.fileType = fileType;
-      }
-
-      await addDoc(collection(firestore, 'chats'), messageData);
+      });
       console.log('Message sent successfully!');
       await updateDoc(doc(firestore, 'typingStatus', participantIds), {
         typing: '',
@@ -168,20 +148,9 @@ const ChatScreen = () => {
         quality: 1,
       });
 
-      if (!result.canceled) {
+      if (!result.cancelled) {
         console.log('Image picked:', result.uri);
-        const fileURL = await uploadFile(result.uri, 'images');
-        const message = {
-          _id: new Date().getTime().toString(),
-          createdAt: new Date(),
-          user: {
-            _id: auth.currentUser.uid,
-            name: username,
-            avatar: profilePicture || './assets/profilepic.jpg',
-          },
-          text: '',
-        };
-        onSend([message], fileURL, 'image')
+        // Handle sending the image as a message here
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -194,18 +163,7 @@ const ChatScreen = () => {
 
       if (result.type === 'success') {
         console.log('Document picked:', result.uri);
-        const fileURL = await uploadFile(result.uri, 'documents');
-        const message = {
-          _id: new Date().getTime().toString(),
-          creadedAt: new Date(),
-          user: {
-            _id: auth.currentUser.uid,
-            name: username,
-            avatar: profilePicture || './assets/profilepic.jpg',
-          },
-          text: '',
-        };
-        onSend([message], fileURL, 'document');
+        // Handle sending the document as a message here
       }
     } catch (error) {
       console.error('Error picking document:', error);
@@ -279,24 +237,6 @@ const ChatScreen = () => {
             },
           }}
         />
-        {props.currentMessage.fileType === 'image' && (
-        <Image
-          source={{ uri: props.currentMessage.file }}
-          style={{ width: 200, height: 200, borderRadius: 10, marginTop: 5 }}
-        />
-      )}
-      {props.currentMessage.fileType === 'document' && (
-        <Text
-          style={{
-            color: '#0000EE',
-            textDecorationLine: 'underline',
-            marginTop: 5,
-          }}
-          onPress={() => Linking.openURL(props.currentMessage.file)}
-        >
-          Open Document
-        </Text>
-      )}
       </View>
     );
   };
