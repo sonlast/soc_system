@@ -24,10 +24,9 @@ export default {
       },
       "permissions": [
         "CAMERA",
-        "CAMERA_ROLL",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
-        "RECORD_AUDIO"
+        "INTERNET"
       ]
     },
     "web": {
