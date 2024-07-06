@@ -314,6 +314,7 @@ const ChatScreen = () => {
             position: 'absolute',
             right: 90,
           }}
+          onPress={VideoC}
         >
           <FontAwesomeIcon
             icon={faVideo}

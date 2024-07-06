@@ -53,7 +53,7 @@ export default function App() {
         <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true }}/>
         <Stack.Screen name="SearchChat" component={SearchChat} options={{ title: 'Search Contacts' }}/>
-        <Stack.Screen name="VideoCall" component={VideoCall} options={{ headerShown: false }}/>
+        <Stack.Screen name="VideoCall" component={VideoCall} options={{ title: 'Video Call' }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
