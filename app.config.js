@@ -32,6 +32,9 @@ export default {
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "plugins": [
+        "@config-plugins/react-native-webrtc",
+    ],
     extra: {
       apiKey: process.env.API_KEY,
       authDomain: process.env.AUTH_DOMAIN,
@@ -43,6 +46,6 @@ export default {
         "projectId": "cb962146-ee56-48aa-9ec2-15570246637f"
       }
     }
-
-  }
+    
+  } 
 }

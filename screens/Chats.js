@@ -141,7 +141,7 @@ const Chats = () => {
             />
           </Pressable>
           <Text style={styles.textheader}>
-            Safe-on-chat
+            Safe-On-Chat
           </Text>
         </View>
         <View styles={{

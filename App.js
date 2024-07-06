@@ -11,6 +11,7 @@ import PinandFingerPrint from './screens/PinandFingerprint';
 import SignUpAuth from './screens/PinandFingerprintSignUp';
 import SearchChat from './screens/SearchChat';
 import ChatScreen from './screens/ChatScreen';
+import VideoCall from './screens/VideoCallScreen';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -52,6 +53,7 @@ export default function App() {
         <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true }}/>
         <Stack.Screen name="SearchChat" component={SearchChat} options={{ title: 'Search Contacts' }}/>
+        <Stack.Screen name="VideoCall" component={VideoCall} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

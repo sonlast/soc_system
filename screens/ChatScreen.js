@@ -24,6 +24,10 @@ const ChatScreen = () => {
   const { user, profilePicture, username } = route.params;
   const participantIds = [auth.currentUser.uid, user.uid].sort().join('_');
 
+  const VideoC = () => {
+    navigation.navigate('VideoCall');
+  };
+
   useEffect(() => {
     const activateScreenCapture = async () => {
       await ScreenCapture.preventScreenCaptureAsync();
@@ -305,15 +309,18 @@ const ChatScreen = () => {
             right: 140,
           }}
         />
-        <FontAwesomeIcon
-          icon={faVideo}
-          size={25}
-          color='#fff'
+        <Pressable
           style={{
             position: 'absolute',
             right: 90,
           }}
-        />
+        >
+          <FontAwesomeIcon
+            icon={faVideo}
+            size={25}
+            color='#fff'
+          />
+        </Pressable>
       </View>
     );
   };
@@ -338,15 +345,11 @@ const ChatScreen = () => {
           wrapperStyle={{
             right: {
               backgroundColor: '#fff',
-              borderRadius: 22,
               paddingHorizontal: 5,
-              paddingVertical: 2,
             },
             left: {
               backgroundColor: '#fff',
-              borderRadius: 22,
               paddingHorizontal: 5,
-              paddingVertical: 2,
             },
           }}
           renderTime={
@@ -472,9 +475,6 @@ const ChatScreen = () => {
       start={[0.5, 0.5]}
     >
       <GiftedChat
-        containerStyle={{
-          color: '#fff',
-        }}
         messages={messages}
         onSend={messages => onSend(messages)}
         user={{
@@ -544,15 +544,15 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   timeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'TitilliumWeb_400Regular',
-    marginHorizontal: 5,
+    marginHorizontal: 6,
   },
   timeLeft: {
-    color: '#000',
+    color: '#555',
   },
   timeRight: {
-    color: '#000',
+    color: '#555',
   },
 });
 
