@@ -62,28 +62,28 @@ export default function App() {
 //! ------------------------------ ADDITIONAL FEATURES
 //* Sending Attachments (other file types) (2 DAY/S)
 //* No SQL (1 DAY/S)
-//TODO: Calls (Video/Audio)
-//* Chatroom (1 DAY/S)
 //* Login / Registration Form (2 DAY/S)
-//TODO: Other Security Features
+//* Chatroom (1 DAY/S)
+//* Can't Screenshot
       //* PIN (3 DAY/S)
       //* Fingerprint (3 DAY/S)
+//TODO: Calls (Video/Audio)
+//TODO: Other Security Features
       //TODO: Twofish / RSA Encryption
-//* Can't Screenshot
 
 //TODO: Modify Algorithm
 
 //! --------------------------------- THESIS FEATURES
 //* Real-time chat (3 DAY/S)
 //* File send (2 DAY/S)
+      //* Images
+      //* Document (different file types)
 //TODO: Group chats
 //TODO: Voice Message
 //TODO: Video Message
 //? Picture
 //TODO: Data Encryption
 //TODO: Multimedia
-      //* Images
-      //* Document (different file types)
       //TODO: Audio
 
 

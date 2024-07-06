@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { BackHandler, Image, Text, View, StyleSheet, Pressable, Linking } from 'react-native';
-import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send, Day } from 'react-native-gifted-chat';
+import { app } from '../firebaseConfig';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { useRoute } from '@react-navigation/native';
-import { app } from '../firebaseConfig';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
-import * as ScreenCapture from 'expo-screen-capture';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane, faPaperclip, faImage, faVideo, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send, Day } from 'react-native-gifted-chat';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -21,24 +20,25 @@ const ChatScreen = () => {
   const [isTyping, setIsTyping] = useState(false);
   const auth = getAuth(app);
   const firestore = getFirestore(app);
-  const storage = getStorage(app);
   const route = useRoute();
   const { user, profilePicture, username } = route.params;
   const participantIds = [auth.currentUser.uid, user.uid].sort().join('_');
 
-  const activate = async () => {
-    await ScreenCapture.preventScreenCaptureAsync();
-  };
+  useEffect(() => {
+    const activateScreenCapture = async () => {
+      await ScreenCapture.preventScreenCaptureAsync();
+    };
+    const deactivateScreenCapture = async () => {
+      await ScreenCapture.allowScreenCaptureAsync();
+    };
 
-  const deactivate = async () => {
-    await ScreenCapture.allowScreenCaptureAsync();
-  };
+    if (isFocused) {
+      activateScreenCapture();
+    } else {
+      deactivateScreenCapture();
+    }
+  }, [isFocused]);
 
-  if (isFocused) {
-    activate();
-  } else {
-    deactivate();
-  }
   useEffect(() => {
     const backAction = () => {
       navigation.navigate("Chats");
@@ -74,8 +74,12 @@ const ChatScreen = () => {
             createdAt: data.createdAt.toDate(),
             user: {
               _id: data.user._id,
-              name: data.user._id === auth.currentUser.uid ? username : user.username,
-              avatar: data.user._id === auth.currentUser.uid ? (profilePicture || './assets/profilepic.jpg') : user.profilePicture,
+              name: data.user._id === auth.currentUser.uid
+                ? username
+                : user.username,
+              avatar: data.user._id === auth.currentUser.uid
+                ? (profilePicture || './assets/profilepic.jpg')
+                : user.profilePicture,
             },
             file: data.file || null,
             fileType: data.fileType || null,

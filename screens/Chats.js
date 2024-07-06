@@ -12,26 +12,26 @@ import { SearchBar } from '@rneui/themed';
 
 const Item = ({ user, onPress }) => (
   <Pressable onPress={() => onPress(user)}>
-  <View style={styles.item}>
-    <View style={{
-      flexDirection: 'row',
-      paddingVertical: 2.5,
-      paddingHorizontal: 5,
-    }}>
-      <View>
-        <Avatar size={48} rounded source={user.profilePicture ? { uri: user.profilePicture } : require('../assets/profilepic.jpg')} />
-      </View>
-      <View>
-        <Text style={{
-          fontFamily: 'TitilliumWeb_400Regular',
-          fontSize: 20,
-          paddingLeft: 10,
-          paddingVertical: 10,
-          textAlignVertical: 'center', 
-        }}>{user.username}</Text>
+    <View style={styles.item}>
+      <View style={{
+        flexDirection: 'row',
+        paddingVertical: 2.5,
+        paddingHorizontal: 5,
+      }}>
+        <View>
+          <Avatar size={48} rounded source={user.profilePicture ? { uri: user.profilePicture } : require('../assets/profilepic.jpg')} />
+        </View>
+        <View>
+          <Text style={{
+            fontFamily: 'TitilliumWeb_400Regular',
+            fontSize: 20,
+            paddingLeft: 10,
+            paddingVertical: 10,
+            textAlignVertical: 'center',
+          }}>{user.username}</Text>
+        </View>
       </View>
     </View>
-  </View>
   </Pressable>
 );
 
@@ -100,8 +100,8 @@ const Chats = () => {
   const handleUserPress = (user) => {
     if (user.uid) {
 
-      navigation.navigate('ChatScreen', {user, username: user.username, profilePicture: user.profilePicture, uid: user.uid});
-    } else { 
+      navigation.navigate('ChatScreen', { user, username: user.username, profilePicture: user.profilePicture, uid: user.uid });
+    } else {
       console.error('User does not have a valid UID');
     }
   };
