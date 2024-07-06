@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { BackHandler, Image, Text, View, StyleSheet, Pressable, Linking } from 'react-native';
-import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send } from 'react-native-gifted-chat';
+import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send, Day } from 'react-native-gifted-chat';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -462,9 +462,14 @@ const ChatScreen = () => {
   };
 
   return (
+    <LinearGradient
+      colors={['#4c669f', '#f0ceff']}
+      style={{ flex: 1 }}
+      start={[0.5, 0.5]}
+    >
       <GiftedChat
         containerStyle={{
-          backgroundColor: '#fff',
+          color: '#fff',
         }}
         messages={messages}
         onSend={messages => onSend(messages)}
@@ -481,8 +486,46 @@ const ChatScreen = () => {
         renderAvatarOnTop={false}
         renderSend={renderSend}
         showAvatarForEveryMessage={false}
+        renderDay={props => <Day {...props} textStyle={{
+          color: '#fff',
+          fontFamily: 'TitilliumWeb_400Regular',
+          fontSize: 16,
+        }}
+        />}
         renderUsernameOnMessage={true}
+        renderChatEmpty={() => (
+          <View style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            transform: [{ rotate: '180deg' }],
+          }}>
+            <Image
+              source={{ uri: user.profilePicture }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                marginBottom: 20,
+                borderWidth: 3,
+                borderColor: '#fff',
+              }}
+            />
+            <Text style={{
+              fontFamily: 'TitilliumWeb_600SemiBold',
+              fontSize: 25,
+              color: '#fff',
+            }}>{user.username}</Text>
+            <Text style={{
+              fontFamily: 'TitilliumWeb_400Regular',
+              fontSize: 16,
+              color: '#fff',
+              marginTop: 5,
+            }}>Start a conversation!</Text>
+          </View>
+        )}
       />
+    </LinearGradient>
   );
 };
 
