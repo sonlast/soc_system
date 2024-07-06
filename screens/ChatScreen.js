@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane, faPaperclip, faImage, faVideo, faPhone } from '@fortawesome/free-solid-svg-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -73,8 +74,8 @@ const ChatScreen = () => {
             createdAt: data.createdAt.toDate(),
             user: {
               _id: data.user._id,
-              name: data.user.name,
-              avatar: data.user.avatar,
+              name: data.user._id === auth.currentUser.uid ? username : user.username,
+              avatar: data.user._id === auth.currentUser.uid ? (profilePicture || './assets/profilepic.jpg') : user.profilePicture,
             },
             file: data.file || null,
             fileType: data.fileType || null,
@@ -128,7 +129,11 @@ const ChatScreen = () => {
         _id,
         createdAt: new Date(),
         text: fileURL ? '' : text,
-        user: sender,
+        user: {
+          _id: sender._id,
+          name: sender._id === auth.currentUser.uid ? username : user.username,
+          avatar: sender._id === auth.currentUser.uid ? (profilePicture || './assets/profilepic.jpg') : user.profilePicture,
+        },
         participants: participantIds,
         file: fileURL || null,
         fileType: fileType || null,
@@ -175,7 +180,6 @@ const ChatScreen = () => {
         const imageUri = result.assets[0].uri;
         console.log('Image picked:', imageUri);
 
-        // Attempt to fetch the image file
         try {
           const fileURL = await uploadFile(imageUri, 'images');
           console.log('File URL:', fileURL);
@@ -213,9 +217,7 @@ const ChatScreen = () => {
         }
       );
 
-      // if (result.type === 'success') {
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        // console.log('Document picked:', result.uri);
         const fileUri = result.assets[0].uri;
 
         try {
@@ -250,7 +252,6 @@ const ChatScreen = () => {
       console.log('Fetching file from URI:', uri);
       const response = await fetch(uri);
 
-      // Log the response status to debug network issues
       console.log('Fetch response status:', response.status);
 
       if (!response.ok) {
@@ -268,7 +269,7 @@ const ChatScreen = () => {
       return downloadURL;
     } catch (error) {
       console.error('Error in uploadFile:', error);
-      throw error; // Rethrow error to be caught in pickImage
+      throw error;
     }
   };
 
@@ -325,38 +326,57 @@ const ChatScreen = () => {
     );
   };
 
-  const CustomBubble = (props, fileType) => {
+  const CustomBubble = (props) => {
     return (
       <View>
         <Bubble
           {...props}
           wrapperStyle={{
             right: {
-              backgroundColor: '#4c669f',
+              backgroundColor: '#fff',
+              borderRadius: 22,
+              paddingHorizontal: 5,
+              paddingVertical: 2,
             },
             left: {
-              backgroundColor: '#f0ceff',
+              backgroundColor: '#fff',
+              borderRadius: 22,
+              paddingHorizontal: 5,
+              paddingVertical: 2,
             },
           }}
+          renderTime={
+            () => <Text style={[
+              props.position === 'left' ? styles.timeLeft : styles.timeRight,
+              styles.timeText,
+            ]}>{props.currentMessage.createdAt.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}</Text>
+          }
         />
         {props.currentMessage.fileType === 'image' && (
           <Image
             source={{ uri: props.currentMessage.file }}
-            style={{ width: 200, height: 200, borderRadius: 10, marginTop: 5 }}
+            style={{
+              width: 200,
+              height: 200,
+              borderRadius: 20,
+              marginTop: 5,
+            }}
           />
         )}
         {props.currentMessage.fileType === 'document' && (
           <Text
             style={{
-              color: '#fff',
+              color: '#4c669f',
               marginVertical: 10,
-              backgroundColor: '#4c669f',
+              backgroundColor: '#fff',
               textDecorationLine: 'underline',
               border: 1,
               borderColor: '#000',
-              borderRadius: 5,
-              paddingLeft: 10,
-              paddingRight: 10,
+              borderRadius: 22,
+              paddingHorizontal: 15,
               paddingBottom: 5,
               paddingTop: 5,
               fontSize: 16,
@@ -376,7 +396,7 @@ const ChatScreen = () => {
       <InputToolbar
         {...props}
         containerStyle={{
-          backgroundColor: '#4c669f',
+          // backgroundColor: '#4c669f',
           maxHeight: 60,
           overflow: 'hidden',
         }}
@@ -388,12 +408,12 @@ const ChatScreen = () => {
                 marginLeft: 1,
                 marginRight: 10,
                 borderWidth: 1,
-                borderColor: 'white',
+                borderColor: '#000',
                 borderRadius: 5,
                 padding: 5,
               }}
             >
-              <FontAwesomeIcon icon={faImage} size={20} color='white' />
+              <FontAwesomeIcon icon={faImage} size={20} color='#000' />
             </Pressable>
             <Pressable
               onPress={pickDocument}
@@ -401,22 +421,22 @@ const ChatScreen = () => {
                 marginLeft: 3,
                 marginRight: 5,
                 borderWidth: 1,
-                borderColor: 'white',
+                borderColor: '#000',
                 borderRadius: 5,
                 padding: 5,
               }}
             >
-              <FontAwesomeIcon icon={faPaperclip} size={20} color='white' />
+              <FontAwesomeIcon icon={faPaperclip} size={20} color='#000' />
             </Pressable>
             <Composer
               {...composerprops}
               textInputStyle={{
-                color: '#fff',
+                color: '#000',
                 fontFamily: 'TitilliumWeb_400Regular',
                 flex: 1,
                 multiline: true,
               }}
-              placeholderTextColor='#fff'
+              placeholderTextColor='#000'
             />
           </View>
         )}
@@ -431,33 +451,38 @@ const ChatScreen = () => {
           marginRight: 10,
           marginBottom: 5,
           borderWidth: 1,
-          borderColor: 'white',
+          borderColor: '#000',
           borderRadius: 5,
           padding: 5,
         }}>
-          <FontAwesomeIcon icon={faPaperPlane} size={20} color='white' />
+          <FontAwesomeIcon icon={faPaperPlane} size={20} color='#000' />
         </View>
       </Send>
     );
   };
 
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={messages => onSend(messages)}
-      user={{
-        _id: auth.currentUser.uid,
-        name: username,
-        avatar: profilePicture || './assets/profilepic.jpg',
-      }}
-      renderBubble={CustomBubble}
-      isTyping={isTyping}
-      onInputTextChanged={handleInputTextChanged}
-      renderMessageText={CustomMessageText}
-      renderInputToolbar={CustomInputToolbar}
-      renderAvatarOnTop={true}
-      renderSend={renderSend}
-    />
+      <GiftedChat
+        containerStyle={{
+          backgroundColor: '#fff',
+        }}
+        messages={messages}
+        onSend={messages => onSend(messages)}
+        user={{
+          _id: auth.currentUser.uid,
+          name: username,
+          avatar: profilePicture || './assets/profilepic.jpg',
+        }}
+        renderBubble={CustomBubble}
+        isTyping={isTyping}
+        onInputTextChanged={handleInputTextChanged}
+        renderMessageText={CustomMessageText}
+        renderInputToolbar={CustomInputToolbar}
+        renderAvatarOnTop={false}
+        renderSend={renderSend}
+        showAvatarForEveryMessage={false}
+        renderUsernameOnMessage={true}
+      />
   );
 };
 
@@ -466,10 +491,21 @@ const styles = StyleSheet.create({
     fontFamily: 'TitilliumWeb_400Regular'
   },
   textLeft: {
-    color: '#000', // Text color for received messages
+    color: '#000',
   },
   textRight: {
-    color: '#fff', // Text color for sent messages
+    color: '#000',
+  },
+  timeText: {
+    fontSize: 11,
+    fontFamily: 'TitilliumWeb_400Regular',
+    marginHorizontal: 5,
+  },
+  timeLeft: {
+    color: '#000',
+  },
+  timeRight: {
+    color: '#000',
   },
 });
 

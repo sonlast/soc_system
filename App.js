@@ -91,7 +91,6 @@ export default function App() {
 //! - implement RSA / TwoFish Encryption
 //! - margin / padding top
 //TODO: - video / audio call
-//TODO: - avatar
 //TODO: - chat ui based on thesis docs
 //? - navigation handling
 //? - configure pin for global storage

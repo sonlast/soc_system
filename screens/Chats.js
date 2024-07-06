@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   //!  FOR THE FLATLIST
   item: {
     flexDirection: 'row',
-    backgroundColor: '#f9c2ff',
+    backgroundColor: '#eef',
     paddingLeft: 10,
     padding: 5,
     marginVertical: 10,
