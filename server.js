@@ -1,6 +1,6 @@
-import express from 'express';
-import { createServer } from 'http';
-import socketIo from 'socket.io';
+const express = require('express');
+const { createServer } = require('http');
+const socketIo = require('socket.io');
 
 const app = express();
 const server = createServer(app);

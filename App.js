@@ -69,10 +69,11 @@ export default function App() {
 //* Can't Screenshot
       //* PIN (3 DAY/S)
       //* Fingerprint (3 DAY/S)
-//TODO: Calls (Video/Audio)
+      //* Video Call
+//TODO: Calls 
+      //TODO: Audio Call
 //TODO: Other Security Features
       //TODO: Twofish / RSA Encryption
-
 //TODO: Modify Algorithm
 
 //! --------------------------------- THESIS FEATURES
@@ -92,7 +93,7 @@ export default function App() {
 //! TASKS for Tomorrow
 //! - implement RSA / TwoFish Encryption
 //! - margin / padding top
-//TODO: - video / audio call
+//TODO: - audio call
 //TODO: - functionality of video call
 //TODO: - ui of video call
 //? - navigation handling
