@@ -44,6 +44,7 @@
     "expo-random": "^14.0.1",
     "expo-screen-capture": "^6.0.1",
     "expo-status-bar": "~1.12.1",
+    "express": "^4.19.2",
     "firebase": "^10.12.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -66,6 +67,8 @@
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "~0.19.10",
     "react-native-webrtc": "^124.0.1",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
     "twofish": "^1.0.1",
     "validator": "^13.12.0"
   },

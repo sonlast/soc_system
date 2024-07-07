@@ -25,7 +25,7 @@ const ChatScreen = () => {
   const participantIds = [auth.currentUser.uid, user.uid].sort().join('_');
 
   const VideoC = () => {
-    navigation.navigate('VideoCall');
+    navigation.navigate('VideoCall', { user });
   };
 
   useEffect(() => {
@@ -497,7 +497,7 @@ const ChatScreen = () => {
           fontSize: 16,
         }}
         />}
-        renderUsernameOnMessage={true}
+        // renderUsernameOnMessage={true}
         renderChatEmpty={() => (
           <View style={{
             flex: 1,
