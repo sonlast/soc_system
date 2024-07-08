@@ -12,6 +12,7 @@ import SignUpAuth from './screens/PinandFingerprintSignUp';
 import SearchChat from './screens/SearchChat';
 import ChatScreen from './screens/ChatScreen';
 import VideoCall from './screens/VideoCallScreen';
+import AudioCall from './screens/AudioCallScreen';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,6 +55,7 @@ export default function App() {
         <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true }}/>
         <Stack.Screen name="SearchChat" component={SearchChat} options={{ title: 'Search Contacts' }}/>
         <Stack.Screen name="VideoCall" component={VideoCall} options={{ title: 'Video Call' }}/>
+        <Stack.Screen name="AudioCall" component={AudioCall} options={{ title: 'Audio Call' }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -70,8 +72,7 @@ export default function App() {
       //* PIN (3 DAY/S)
       //* Fingerprint (3 DAY/S)
       //* Video Call
-//TODO: Calls 
-      //TODO: Audio Call
+      //? Audio Call
 //TODO: Other Security Features
       //TODO: Twofish / RSA Encryption
 //TODO: Modify Algorithm
@@ -93,9 +94,13 @@ export default function App() {
 //! TASKS for Tomorrow
 //! - implement RSA / TwoFish Encryption
 //! - margin / padding top
-//TODO: - audio call
-//TODO: - functionality of video call
-//TODO: - ui of video call
+//TODO: - list calls in chat tab
+//TODO: - encrypt messages
+//TODO: - recent message in chat
+//TODO: - group chat 
+//TODO: - voice message
+//TODO: - video message
+
 //? - navigation handling
 //? - configure pin for global storage
 

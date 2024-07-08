@@ -1,18 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Image, Text, StyleSheet, Pressable } from 'react-native';
-import { RTCView, mediaDevices, RTCPeerConnection, RTCSessionDescription } from 'react-native-webrtc';
+import { View, Image, Text, Button, StyleSheet, Pressable } from 'react-native';
+import { mediaDevices, RTCPeerConnection, RTCSessionDescription } from 'react-native-webrtc';
 import io from 'socket.io-client';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPhoneSlash, faPhone, faMicrophone, faMicrophoneSlash, faVideo, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
+import { faPhoneSlash, faPhone } from '@fortawesome/free-solid-svg-icons';
 
-const VideoCallScreen = ({ route, navigation }) => {
-  const { user, profilePicture } = route.params;
+const AudioCallScreen = ({ route, navigation }) => {
+  const { user, username, profilePicture } = route.params;
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [callStarted, setCallStarted] = useState(false);
-  const [isMicOn, setIsMicOn] = useState(true);
-  const [isCameraOn, setIsCameraOn] = useState(true);
   const socketRef = useRef(null);
   const pcRef = useRef(null);
 
@@ -106,7 +104,6 @@ const VideoCallScreen = ({ route, navigation }) => {
     try {
       const stream = await mediaDevices.getUserMedia({
         audio: true,
-        video: true,
       });
       setLocalStream(stream);
       if (!pcRef.current) {
@@ -152,45 +149,13 @@ const VideoCallScreen = ({ route, navigation }) => {
     setCallStarted(false);
   };
 
-  const toggleMicrophone = () => {
-    if (localStream) {
-      localStream.getAudioTracks().forEach(track => {
-        track.enabled = !track.enabled;
-        setIsMicOn(track.enabled);
-      });
-    }
-  };
-
-  const toggleCamera = () => {
-    if (localStream) {
-      localStream.getVideoTracks().forEach(track => {
-        track.enabled = !track.enabled;
-        setIsCameraOn(track.enabled);
-      });
-    }
-  };
-
   return (
     <View style={styles.container}>
-      {localStream && (
-        <RTCView
-          streamURL={localStream.toURL()}
-          style={styles.rtcView}
-          objectFit="cover"
-        />
-      )}
-      {remoteStream && (
-        <RTCView
-          streamURL={remoteStream.toURL()}
-          style={styles.rtcView}
-          objectFit="cover"
-        />
-      )}
       <View style={{
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginTop: 20,
-        width: '70%',
+        width: '50%',
       }}>
         {!callStarted ? (
           <View
@@ -215,34 +180,44 @@ const VideoCallScreen = ({ route, navigation }) => {
           </View>
         ) : (
           <>
-            <Pressable style={{
-              ...styles.button,
-              backgroundColor: isMicOn ? '#fff' : '#f44336',
-            }}
-              onPress={toggleMicrophone}
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 50,
+              }}
             >
-              <FontAwesomeIcon icon={isMicOn ? faMicrophone : faMicrophoneSlash} size={35} color={isMicOn ? '#f44336' : "#fff"} />
-            </Pressable>
-            <Pressable style={{
-              ...styles.button,
-              backgroundColor: '#fff',
-            }} onPress={createOffer}>
-              <FontAwesomeIcon icon={faPhone} size={35} color="#00ff66" />
-            </Pressable>
-            <Pressable style={{
-              ...styles.button,
-              backgroundColor: '#fff',
-            }} onPress={endCall}>
-              <FontAwesomeIcon icon={faPhoneSlash} size={35} color="#f44336" />
-            </Pressable>
-            <Pressable style={{
-              ...styles.button,
-              backgroundColor: isCameraOn ? '#fff' : '#f44336',
-            }}
-              onPress={toggleCamera}
-            >
-              <FontAwesomeIcon icon={isCameraOn ? faVideo : faVideoSlash} size={35} color={isCameraOn ? "#f44336" : "#fff"} />
-            </Pressable>
+              <Image
+                source={{ uri: profilePicture }}
+                style={{
+                  width: 150,
+                  height: 150,
+                  borderRadius: 75,
+                  marginBottom: 10,
+                }}
+              />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-around',
+                  marginTop: 20,
+                  width: '100%',
+                }}
+              >
+                <Pressable style={{
+                  ...styles.button,
+                  backgroundColor: '#00ff66',
+                }} onPress={createOffer}>
+                  <FontAwesomeIcon icon={faPhone} size={40} color="#fff" />
+                </Pressable>
+                <Pressable style={{
+                  ...styles.button,
+                  backgroundColor: '#f44336',
+                }} onPress={endCall}>
+                  <FontAwesomeIcon icon={faPhoneSlash} size={40} color="#fff" />
+                </Pressable>
+              </View>
+            </View>
           </>
         )}
       </View>
@@ -257,16 +232,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#4c669f',
     position: 'relative',
   },
-  rtcView: {
-    width: '100%',
-    height: '43%',
-    backgroundColor: '#000',
-    zIndex: 0,
-  },
   button: {
     padding: 10,
     borderRadius: 5,
-    backgroundColor: '#f0ceff',
+    backgroundColor: '#00ff00',
     marginTop: 10,
   },
   buttonText: {
@@ -276,4 +245,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default VideoCallScreen;
+export default AudioCallScreen;

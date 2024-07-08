@@ -25,9 +25,13 @@ const ChatScreen = () => {
   const participantIds = [auth.currentUser.uid, user.uid].sort().join('_');
 
   const VideoC = () => {
-    navigation.navigate('VideoCall', { user });
+    navigation.navigate('VideoCall', { user, profilePicture });
   };
 
+  const AudioC = () => {
+    navigation.navigate('AudioCall', { user, profilePicture });  
+  }
+  
   useEffect(() => {
     const activateScreenCapture = async () => {
       await ScreenCapture.preventScreenCaptureAsync();
@@ -300,15 +304,19 @@ const ChatScreen = () => {
           fontSize: 20,
           fontFamily: 'TitilliumWeb_600SemiBold',
         }}>{username}</Text>
-        <FontAwesomeIcon
-          icon={faPhone}
-          size={21}
-          color='#fff'
+        <Pressable
           style={{
             position: 'absolute',
             right: 140,
           }}
-        />
+          onPress={AudioC}
+        >
+          <FontAwesomeIcon
+            icon={faPhone}
+            size={21}
+            color='#fff'
+          />
+        </Pressable>
         <Pressable
           style={{
             position: 'absolute',
