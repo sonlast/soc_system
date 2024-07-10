@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { RSA } from 'react-native-rsa-native';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -23,6 +24,30 @@ const ChatScreen = () => {
   const route = useRoute();
   const { user, profilePicture, username } = route.params;
   const participantIds = [auth.currentUser.uid, user.uid].sort().join('_');
+
+  useEffect(() => {
+    RSA.generateKeys(2048) // set key size
+    .then(keys => {
+      console.log('2048 private:', keys.private); // the private key
+      console.log('2048 public:', keys.public); // the public key
+    });
+  })
+
+  // encryption 
+  const encrypt = (text) => {
+    RSA.encrypt(text, publicKey)
+    .then(encryptedText => {
+      console.log(encryptedText); // the encrypted text
+    });
+  }
+
+  // decryption
+  const decrypt = (encryptedText) => {
+    RSA.decrypt(encryptedText, privateKey)
+    .then(decryptedText => {
+      console.log(decryptedText); // the decrypted text
+    });
+  }
 
   const VideoC = () => {
     navigation.navigate('VideoCall', { user, profilePicture });
@@ -76,9 +101,10 @@ const ChatScreen = () => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const messagesFirestore = snapshot.docs.map((doc) => {
           const data = doc.data();
+          const decryptedText = decrypt(data.text);
           return {
             _id: doc.id,
-            text: data.text,
+            text: decryptedText,
             createdAt: data.createdAt.toDate(),
             user: {
               _id: data.user._id,
@@ -137,10 +163,12 @@ const ChatScreen = () => {
     }
 
     try {
+      const encryptedText = encrypt(text);
+
       const messageData = {
         _id,
         createdAt: new Date(),
-        text: fileURL ? '' : text,
+        text: fileURL ? '' : encryptedText,
         user: {
           _id: sender._id,
           name: sender._id === auth.currentUser.uid ? username : user.username,
