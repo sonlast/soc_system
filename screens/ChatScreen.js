@@ -13,6 +13,9 @@ import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { RSA } from 'react-native-rsa-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CryptoJS from 'crypto-js';
+global.Buffer = require('buffer').Buffer;
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -24,39 +27,17 @@ const ChatScreen = () => {
   const route = useRoute();
   const { user, profilePicture, username } = route.params;
   const participantIds = [auth.currentUser.uid, user.uid].sort().join('_');
-
-  useEffect(() => {
-    RSA.generateKeys(2048) // set key size
-    .then(keys => {
-      console.log('2048 private:', keys.private); // the private key
-      console.log('2048 public:', keys.public); // the public key
-    });
-  })
-
-  // encryption 
-  const encrypt = (text) => {
-    RSA.encrypt(text, publicKey)
-    .then(encryptedText => {
-      console.log(encryptedText); // the encrypted text
-    });
-  }
-
-  // decryption
-  const decrypt = (encryptedText) => {
-    RSA.decrypt(encryptedText, privateKey)
-    .then(decryptedText => {
-      console.log(decryptedText); // the decrypted text
-    });
-  }
+  const [privateKey, setPrivateKey] = useState('');
+  const [publicKey, setPublicKey] = useState('');
 
   const VideoC = () => {
     navigation.navigate('VideoCall', { user, profilePicture });
   };
 
   const AudioC = () => {
-    navigation.navigate('AudioCall', { user, profilePicture });  
+    navigation.navigate('AudioCall', { user, profilePicture });
   }
-  
+
   useEffect(() => {
     const activateScreenCapture = async () => {
       await ScreenCapture.preventScreenCaptureAsync();
@@ -86,6 +67,74 @@ const ChatScreen = () => {
     return () => backHandler.remove();
   }, [navigation]);
 
+  // useEffect(() => {
+  //   RSA.generateKeys(4096).then(keys => {
+  //     console.log('4096 private:', keys.private);
+  //     console.log('4096 public:', keys.public);
+  //     // Store keys securely, possibly in AsyncStorage or a secure store
+  //     // For simplicity, we store them in state variables here
+  //     setPrivateKey(keys.private);
+  //     setPublicKey(keys.public);
+  //   });
+  // }, []);
+
+  useEffect(() => {
+    const generateAndStoreKeys = async () => {
+      try {
+        const keys = await RSA.generateKeys(4096);
+        await AsyncStorage.setItem('privateKey', keys.private);
+        await AsyncStorage.setItem('publicKey', keys.public);
+        setPrivateKey(keys.private);
+        setPublicKey(keys.public);
+        console.log(publicKey);
+        console.log(privateKey)
+      } catch (error) {
+        console.error('Error generating or storing keys:', error);
+      }
+    };
+
+    generateAndStoreKeys();
+  }, []);
+
+  const loadKeys = async () => {
+    try {
+      const storedPrivateKey = await AsyncStorage.getItem('privateKey');
+      const storedPublicKey = await AsyncStorage.getItem('publicKey');
+      if (storedPrivateKey && storedPublicKey) {
+        setPrivateKey(storedPrivateKey);
+        setPublicKey(storedPublicKey);
+      } else {
+        console.error('Keys not found in storage');
+      }
+    } catch (error) {
+      console.error('Error loading keys from storage:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadKeys();
+  }, []);
+
+  useEffect(() => {
+    loadKeys().then(() => {
+      // Test encryption and decryption with loaded keys
+      if (publicKey && privateKey) {
+        const testString = "Test message";
+        RSA.encrypt(testString, publicKey)
+          .then(encrypted => {
+            console.log('Encrypted Test String:', encrypted);
+            return RSA.decrypt(encrypted, privateKey);
+          })
+          .then(decrypted => {
+            console.log('Decrypted Test String:', decrypted);
+          })
+          .catch(error => {
+            console.error('Error during test encryption/decryption:', error);
+          });
+      }
+    });
+  }, []);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => <HeaderWithPicture username={username} profilePicture={profilePicture} />,
@@ -98,12 +147,44 @@ const ChatScreen = () => {
         orderBy('createdAt', 'desc')
       );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const messagesFirestore = snapshot.docs.map((doc) => {
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const messagesFirestore = await Promise.all(snapshot.docs.map(async (doc) => {
           const data = doc.data();
-          const decryptedText = decrypt(data.text);
+
+          let decryptedText = data.text;
+          if (data.text && data.aesKey) {
+            try {
+              console.log('Decryption started...')
+              console.log('Encrypted AES key:', data.aesKey);
+              console.log('Private key:', privateKey);
+              const decryptedAesKeyBase64 = await RSA.decrypt(data.aesKey, privateKey); // Decrypt AES key with RSA
+              console.log("Decrypted AES key base64:", decryptedAesKeyBase64)
+              const decryptedAesKey = Buffer.from(decryptedAesKeyBase64, 'base64').toString('hex');
+              console.log("Decrypted AES key:", decryptedAesKey)
+              const decryptedTextBytes = CryptoJS.AES.decrypt(data.text, decryptedAesKey);
+              console.log('Decrypted message bytes:', decryptedTextBytes);
+              decryptedText = decryptedTextBytes.toString(CryptoJS.enc.Utf8); // Decrypt message with AES key
+              console.log('Decrypted message text:', decryptedText);
+            } catch (error) {
+              console.error('Error decrypting message:', error);
+            }
+          }
+
+          // let decryptedText = '';
+
+          // if (data.text && data.aesKey) {
+          //   try {
+          //     const aesKeyBuffer = Buffer.from(await RSA.decrypt(data.aesKey, privateKey), 'base64');
+          //     const aesKey = aesKeyBuffer.toString();
+          //     decryptedText = CryptoJS.AES.decrypt(data.text, aesKey).toString(CryptoJS.enc.Utf8);
+          //   } catch (error) {
+          //     console.error('Error decrypting message:', error);
+          //   }
+          // }
+
           return {
             _id: doc.id,
+            // text: decryptedText || data.text ,
             text: decryptedText,
             createdAt: data.createdAt.toDate(),
             user: {
@@ -118,7 +199,7 @@ const ChatScreen = () => {
             file: data.file || null,
             fileType: data.fileType || null,
           };
-        });
+        }));
         setMessages(messagesFirestore);
       });
 
@@ -128,7 +209,7 @@ const ChatScreen = () => {
     } else {
       console.error('Current user or chat participant is missing a UID');
     }
-  }, [firestore, auth.currentUser, user, participantIds]);
+  }, [firestore, auth.currentUser, user, participantIds, privateKey]);
 
   useLayoutEffect(() => {
     if (auth.currentUser && user && user.uid) {
@@ -163,12 +244,22 @@ const ChatScreen = () => {
     }
 
     try {
-      const encryptedText = encrypt(text);
+      const aesKey = CryptoJS.lib.WordArray.random(16).toString(); // Generate AES key
+
+      let encryptedText = '';
+      if (text) {
+        encryptedText = CryptoJS.AES.encrypt(text, aesKey).toString(); // Encrypt message with AES key
+      }
+
+      // Encrypt AES key with RSA
+      const aesKeyBuffer = Buffer.from(aesKey, 'hex');
+      const encryptedAesKey = await RSA.encrypt(aesKeyBuffer.toString('base64'), publicKey);
 
       const messageData = {
         _id,
         createdAt: new Date(),
         text: fileURL ? '' : encryptedText,
+        aesKey: encryptedAesKey,
         user: {
           _id: sender._id,
           name: sender._id === auth.currentUser.uid ? username : user.username,
@@ -188,7 +279,7 @@ const ChatScreen = () => {
     } catch (error) {
       console.error('Error sending message: ', error);
     }
-  }, [auth.currentUser.uid, user.uid, firestore, participantIds]);
+  }, [auth.currentUser.uid, user.uid, firestore, participantIds, publicKey]);
 
   const handleInputTextChanged = async (text) => {
     const typingDocRef = doc(firestore, 'typingStatus', participantIds);
