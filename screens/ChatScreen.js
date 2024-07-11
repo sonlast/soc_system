@@ -2,7 +2,7 @@ import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import { BackHandler, Image, Text, View, StyleSheet, Pressable, Linking } from 'react-native';
 import { app } from '../firebaseConfig';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, orderBy, getDoc, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -12,23 +12,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { RSA } from 'react-native-rsa-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CryptoJS from 'crypto-js';
+import QuickCrypto from 'react-native-quick-crypto';
 global.Buffer = require('buffer').Buffer;
+// import { Buffer } from 'buffer';
+// global.Buffer = Buffer;
 
 const ChatScreen = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [publicKey, setPublicKey] = useState('');
+  const [privateKey, setPrivateKey] = useState('');
   const auth = getAuth(app);
   const firestore = getFirestore(app);
   const route = useRoute();
   const { user, profilePicture, username } = route.params;
   const participantIds = [auth.currentUser.uid, user.uid].sort().join('_');
-  const [privateKey, setPrivateKey] = useState('');
-  const [publicKey, setPublicKey] = useState('');
 
   const VideoC = () => {
     navigation.navigate('VideoCall', { user, profilePicture });
@@ -37,6 +38,34 @@ const ChatScreen = () => {
   const AudioC = () => {
     navigation.navigate('AudioCall', { user, profilePicture });
   }
+
+  useEffect(() => {
+    const fetchKeys = async () => {
+      try {
+        // Fetch public key from Firestore
+        const publicKeyDoc = await getDoc(doc(firestore, 'users', user.uid));
+        if (publicKeyDoc.exists()) {
+          console.log('Public key fetched successfully', publicKey);
+          setPublicKey(publicKeyDoc.data().publicKey);
+        } else {
+          console.error('Public key not found');
+        }
+
+        // Fetch private key from AsyncStorage
+        const privateKey = await AsyncStorage.getItem('privateKey');
+        if (privateKey) {
+          console.log('Private key fetched successfully', privateKey);
+          setPrivateKey(privateKey);
+        } else {
+          console.error('Private key not found');
+        }
+      } catch (error) {
+        console.error('Error fetching keys:', error);
+      }
+    };
+
+    fetchKeys();
+  }, [firestore, user.uid]);
 
   useEffect(() => {
     const activateScreenCapture = async () => {
@@ -67,74 +96,6 @@ const ChatScreen = () => {
     return () => backHandler.remove();
   }, [navigation]);
 
-  // useEffect(() => {
-  //   RSA.generateKeys(4096).then(keys => {
-  //     console.log('4096 private:', keys.private);
-  //     console.log('4096 public:', keys.public);
-  //     // Store keys securely, possibly in AsyncStorage or a secure store
-  //     // For simplicity, we store them in state variables here
-  //     setPrivateKey(keys.private);
-  //     setPublicKey(keys.public);
-  //   });
-  // }, []);
-
-  useEffect(() => {
-    const generateAndStoreKeys = async () => {
-      try {
-        const keys = await RSA.generateKeys(4096);
-        await AsyncStorage.setItem('privateKey', keys.private);
-        await AsyncStorage.setItem('publicKey', keys.public);
-        setPrivateKey(keys.private);
-        setPublicKey(keys.public);
-        console.log(publicKey);
-        console.log(privateKey)
-      } catch (error) {
-        console.error('Error generating or storing keys:', error);
-      }
-    };
-
-    generateAndStoreKeys();
-  }, []);
-
-  const loadKeys = async () => {
-    try {
-      const storedPrivateKey = await AsyncStorage.getItem('privateKey');
-      const storedPublicKey = await AsyncStorage.getItem('publicKey');
-      if (storedPrivateKey && storedPublicKey) {
-        setPrivateKey(storedPrivateKey);
-        setPublicKey(storedPublicKey);
-      } else {
-        console.error('Keys not found in storage');
-      }
-    } catch (error) {
-      console.error('Error loading keys from storage:', error);
-    }
-  };
-
-  useEffect(() => {
-    loadKeys();
-  }, []);
-
-  useEffect(() => {
-    loadKeys().then(() => {
-      // Test encryption and decryption with loaded keys
-      if (publicKey && privateKey) {
-        const testString = "Test message";
-        RSA.encrypt(testString, publicKey)
-          .then(encrypted => {
-            console.log('Encrypted Test String:', encrypted);
-            return RSA.decrypt(encrypted, privateKey);
-          })
-          .then(decrypted => {
-            console.log('Decrypted Test String:', decrypted);
-          })
-          .catch(error => {
-            console.error('Error during test encryption/decryption:', error);
-          });
-      }
-    });
-  }, []);
-
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => <HeaderWithPicture username={username} profilePicture={profilePicture} />,
@@ -147,44 +108,23 @@ const ChatScreen = () => {
         orderBy('createdAt', 'desc')
       );
 
-      const unsubscribe = onSnapshot(q, async (snapshot) => {
-        const messagesFirestore = await Promise.all(snapshot.docs.map(async (doc) => {
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const messagesFirestore = snapshot.docs.map((doc) => {
           const data = doc.data();
 
-          let decryptedText = data.text;
-          if (data.text && data.aesKey) {
+          let decryptedText = '';
+          if (data.text) {
             try {
-              console.log('Decryption started...')
-              console.log('Encrypted AES key:', data.aesKey);
-              console.log('Private key:', privateKey);
-              const decryptedAesKeyBase64 = await RSA.decrypt(data.aesKey, privateKey); // Decrypt AES key with RSA
-              console.log("Decrypted AES key base64:", decryptedAesKeyBase64)
-              const decryptedAesKey = Buffer.from(decryptedAesKeyBase64, 'base64').toString('hex');
-              console.log("Decrypted AES key:", decryptedAesKey)
-              const decryptedTextBytes = CryptoJS.AES.decrypt(data.text, decryptedAesKey);
-              console.log('Decrypted message bytes:', decryptedTextBytes);
-              decryptedText = decryptedTextBytes.toString(CryptoJS.enc.Utf8); // Decrypt message with AES key
-              console.log('Decrypted message text:', decryptedText);
+              const buffer = Buffer.from(data.text, 'base64');
+              decryptedText = QuickCrypto.privateDecrypt(privateKey, buffer).toString('utf8');
+              console.log('Decrypted text:', decryptedText);
             } catch (error) {
-              console.error('Error decrypting message:', error);
+              console.error('Error decrypting text:', error.message);
             }
           }
 
-          // let decryptedText = '';
-
-          // if (data.text && data.aesKey) {
-          //   try {
-          //     const aesKeyBuffer = Buffer.from(await RSA.decrypt(data.aesKey, privateKey), 'base64');
-          //     const aesKey = aesKeyBuffer.toString();
-          //     decryptedText = CryptoJS.AES.decrypt(data.text, aesKey).toString(CryptoJS.enc.Utf8);
-          //   } catch (error) {
-          //     console.error('Error decrypting message:', error);
-          //   }
-          // }
-
           return {
             _id: doc.id,
-            // text: decryptedText || data.text ,
             text: decryptedText,
             createdAt: data.createdAt.toDate(),
             user: {
@@ -199,7 +139,7 @@ const ChatScreen = () => {
             file: data.file || null,
             fileType: data.fileType || null,
           };
-        }));
+        });
         setMessages(messagesFirestore);
       });
 
@@ -209,7 +149,7 @@ const ChatScreen = () => {
     } else {
       console.error('Current user or chat participant is missing a UID');
     }
-  }, [firestore, auth.currentUser, user, participantIds, privateKey]);
+  }, [firestore, auth.currentUser, user, participantIds]);
 
   useLayoutEffect(() => {
     if (auth.currentUser && user && user.uid) {
@@ -244,22 +184,16 @@ const ChatScreen = () => {
     }
 
     try {
-      const aesKey = CryptoJS.lib.WordArray.random(16).toString(); // Generate AES key
-
       let encryptedText = '';
       if (text) {
-        encryptedText = CryptoJS.AES.encrypt(text, aesKey).toString(); // Encrypt message with AES key
+        const buffer = Buffer.from(text, 'utf8');
+        encryptedText = QuickCrypto.publicEncrypt(publicKey, buffer).toString('base64');
       }
-
-      // Encrypt AES key with RSA
-      const aesKeyBuffer = Buffer.from(aesKey, 'hex');
-      const encryptedAesKey = await RSA.encrypt(aesKeyBuffer.toString('base64'), publicKey);
 
       const messageData = {
         _id,
         createdAt: new Date(),
         text: fileURL ? '' : encryptedText,
-        aesKey: encryptedAesKey,
         user: {
           _id: sender._id,
           name: sender._id === auth.currentUser.uid ? username : user.username,
@@ -279,7 +213,7 @@ const ChatScreen = () => {
     } catch (error) {
       console.error('Error sending message: ', error);
     }
-  }, [auth.currentUser.uid, user.uid, firestore, participantIds, publicKey]);
+  }, [auth.currentUser.uid, user.uid, firestore, participantIds]);
 
   const handleInputTextChanged = async (text) => {
     const typingDocRef = doc(firestore, 'typingStatus', participantIds);

@@ -10,6 +10,8 @@ import { app } from '../firebaseConfig';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import QuickCrypto from 'react-native-quick-crypto';
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
@@ -47,6 +49,23 @@ const RegisterScreen = () => {
       errors.push("Password must contain at least one special character.");
     }
     return errors;
+  };
+
+  const generateKeyPair = async () => {
+    const { publicKey, privateKey } = QuickCrypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: {
+        type: 'spki',
+        format: 'pem',
+      },
+      privateKeyEncoding: {
+        type: 'pkcs8',
+        format: 'pem',
+      },
+    });
+
+    await AsyncStorage.setItem('privateKey', privateKey);
+    return publicKey;
   };
 
   const pressSignup = async () => {
@@ -96,12 +115,15 @@ const RegisterScreen = () => {
         imageUrl = await getDownloadURL(storageRef);
       }
       
+      const publicKey = await generateKeyPair();
+
       const userDoc = doc(firestore, "users", user.uid);
       await setDoc(userDoc, {
         uid: user.uid,
         username: formattedUsername,
         email: email,
         profilePicture: imageUrl,
+        publicKey: publicKey,
       });
       
       setAuthError("Account created successfully!");
