@@ -1,18 +1,25 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import { BackHandler, Image, Text, View, StyleSheet, Pressable } from 'react-native';
-import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send } from 'react-native-gifted-chat';
+import { BackHandler, Image, Text, View, StyleSheet, Pressable, Linking } from 'react-native';
+import { app } from '../firebaseConfig';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, orderBy, doc, updateDoc, setDoc, serverTimestamp, query, onSnapshot, where } from 'firebase/firestore';
-import { useRoute } from '@react-navigation/native';
-import { app } from '../firebaseConfig';
-import { useNavigation } from '@react-navigation/native';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane, faPaperclip, faImage, faVideo, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { Composer, GiftedChat, Bubble, MessageText, InputToolbar, Send, Day } from 'react-native-gifted-chat';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { RSA } from 'react-native-rsa-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CryptoJS from 'crypto-js';
+global.Buffer = require('buffer').Buffer;
 
 const ChatScreen = () => {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const auth = getAuth(app);
@@ -20,6 +27,31 @@ const ChatScreen = () => {
   const route = useRoute();
   const { user, profilePicture, username } = route.params;
   const participantIds = [auth.currentUser.uid, user.uid].sort().join('_');
+  const [privateKey, setPrivateKey] = useState('');
+  const [publicKey, setPublicKey] = useState('');
+
+  const VideoC = () => {
+    navigation.navigate('VideoCall', { user, profilePicture });
+  };
+
+  const AudioC = () => {
+    navigation.navigate('AudioCall', { user, profilePicture });
+  }
+
+  useEffect(() => {
+    const activateScreenCapture = async () => {
+      await ScreenCapture.preventScreenCaptureAsync();
+    };
+    const deactivateScreenCapture = async () => {
+      await ScreenCapture.allowScreenCaptureAsync();
+    };
+
+    if (isFocused) {
+      activateScreenCapture();
+    } else {
+      deactivateScreenCapture();
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     const backAction = () => {
@@ -33,6 +65,74 @@ const ChatScreen = () => {
     );
 
     return () => backHandler.remove();
+  }, [navigation]);
+
+  // useEffect(() => {
+  //   RSA.generateKeys(4096).then(keys => {
+  //     console.log('4096 private:', keys.private);
+  //     console.log('4096 public:', keys.public);
+  //     // Store keys securely, possibly in AsyncStorage or a secure store
+  //     // For simplicity, we store them in state variables here
+  //     setPrivateKey(keys.private);
+  //     setPublicKey(keys.public);
+  //   });
+  // }, []);
+
+  useEffect(() => {
+    const generateAndStoreKeys = async () => {
+      try {
+        const keys = await RSA.generateKeys(4096);
+        await AsyncStorage.setItem('privateKey', keys.private);
+        await AsyncStorage.setItem('publicKey', keys.public);
+        setPrivateKey(keys.private);
+        setPublicKey(keys.public);
+        console.log(publicKey);
+        console.log(privateKey)
+      } catch (error) {
+        console.error('Error generating or storing keys:', error);
+      }
+    };
+
+    generateAndStoreKeys();
+  }, []);
+
+  const loadKeys = async () => {
+    try {
+      const storedPrivateKey = await AsyncStorage.getItem('privateKey');
+      const storedPublicKey = await AsyncStorage.getItem('publicKey');
+      if (storedPrivateKey && storedPublicKey) {
+        setPrivateKey(storedPrivateKey);
+        setPublicKey(storedPublicKey);
+      } else {
+        console.error('Keys not found in storage');
+      }
+    } catch (error) {
+      console.error('Error loading keys from storage:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadKeys();
+  }, []);
+
+  useEffect(() => {
+    loadKeys().then(() => {
+      // Test encryption and decryption with loaded keys
+      if (publicKey && privateKey) {
+        const testString = "Test message";
+        RSA.encrypt(testString, publicKey)
+          .then(encrypted => {
+            console.log('Encrypted Test String:', encrypted);
+            return RSA.decrypt(encrypted, privateKey);
+          })
+          .then(decrypted => {
+            console.log('Decrypted Test String:', decrypted);
+          })
+          .catch(error => {
+            console.error('Error during test encryption/decryption:', error);
+          });
+      }
+    });
   }, []);
 
   useLayoutEffect(() => {
@@ -47,20 +147,59 @@ const ChatScreen = () => {
         orderBy('createdAt', 'desc')
       );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const messagesFirestore = snapshot.docs.map((doc) => {
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const messagesFirestore = await Promise.all(snapshot.docs.map(async (doc) => {
           const data = doc.data();
+
+          let decryptedText = data.text;
+          if (data.text && data.aesKey) {
+            try {
+              console.log('Decryption started...')
+              console.log('Encrypted AES key:', data.aesKey);
+              console.log('Private key:', privateKey);
+              const decryptedAesKeyBase64 = await RSA.decrypt(data.aesKey, privateKey); // Decrypt AES key with RSA
+              console.log("Decrypted AES key base64:", decryptedAesKeyBase64)
+              const decryptedAesKey = Buffer.from(decryptedAesKeyBase64, 'base64').toString('hex');
+              console.log("Decrypted AES key:", decryptedAesKey)
+              const decryptedTextBytes = CryptoJS.AES.decrypt(data.text, decryptedAesKey);
+              console.log('Decrypted message bytes:', decryptedTextBytes);
+              decryptedText = decryptedTextBytes.toString(CryptoJS.enc.Utf8); // Decrypt message with AES key
+              console.log('Decrypted message text:', decryptedText);
+            } catch (error) {
+              console.error('Error decrypting message:', error);
+            }
+          }
+
+          // let decryptedText = '';
+
+          // if (data.text && data.aesKey) {
+          //   try {
+          //     const aesKeyBuffer = Buffer.from(await RSA.decrypt(data.aesKey, privateKey), 'base64');
+          //     const aesKey = aesKeyBuffer.toString();
+          //     decryptedText = CryptoJS.AES.decrypt(data.text, aesKey).toString(CryptoJS.enc.Utf8);
+          //   } catch (error) {
+          //     console.error('Error decrypting message:', error);
+          //   }
+          // }
+
           return {
             _id: doc.id,
-            text: data.text,
+            // text: decryptedText || data.text ,
+            text: decryptedText,
             createdAt: data.createdAt.toDate(),
             user: {
               _id: data.user._id,
-              name: username,
-              avatar: profilePicture,
+              name: data.user._id === auth.currentUser.uid
+                ? username
+                : user.username,
+              avatar: data.user._id === auth.currentUser.uid
+                ? (profilePicture || './assets/profilepic.jpg')
+                : user.profilePicture,
             },
+            file: data.file || null,
+            fileType: data.fileType || null,
           };
-        });
+        }));
         setMessages(messagesFirestore);
       });
 
@@ -70,7 +209,7 @@ const ChatScreen = () => {
     } else {
       console.error('Current user or chat participant is missing a UID');
     }
-  }, [firestore, auth.currentUser, user]);
+  }, [firestore, auth.currentUser, user, participantIds, privateKey]);
 
   useLayoutEffect(() => {
     if (auth.currentUser && user && user.uid) {
@@ -92,7 +231,7 @@ const ChatScreen = () => {
   const onSend = useCallback(async (messages = [], fileURL = null, fileType = null) => {
     const message = messages[0];
 
-    if (!message || !message._id || !message.createdAt || !message.user) {
+    if (!message || !message._id || !message.createdAt || (!message.text && !fileURL) || !message.user) {
       console.error('Invalid message format:', message);
       return;
     }
@@ -105,29 +244,42 @@ const ChatScreen = () => {
     }
 
     try {
+      const aesKey = CryptoJS.lib.WordArray.random(16).toString(); // Generate AES key
+
+      let encryptedText = '';
+      if (text) {
+        encryptedText = CryptoJS.AES.encrypt(text, aesKey).toString(); // Encrypt message with AES key
+      }
+
+      // Encrypt AES key with RSA
+      const aesKeyBuffer = Buffer.from(aesKey, 'hex');
+      const encryptedAesKey = await RSA.encrypt(aesKeyBuffer.toString('base64'), publicKey);
+
       const messageData = {
         _id,
         createdAt: new Date(),
-        text: fileURL ? '' : text,
-        user: sender,
+        text: fileURL ? '' : encryptedText,
+        aesKey: encryptedAesKey,
+        user: {
+          _id: sender._id,
+          name: sender._id === auth.currentUser.uid ? username : user.username,
+          avatar: sender._id === auth.currentUser.uid ? (profilePicture || './assets/profilepic.jpg') : user.profilePicture,
+        },
         participants: participantIds,
+        file: fileURL || null,
+        fileType: fileType || null,
       };
-
-      if (fileURL) {
-        messageData.file = fileURL;
-        messageData.fileType = fileType;
-      }
 
       await addDoc(collection(firestore, 'chats'), messageData);
       console.log('Message sent successfully!');
-      await updateDoc(doc(firestore, 'typingStatus', participantIds), {
+      await setDoc(doc(firestore, 'typingStatus', participantIds), {
         typing: '',
         lastTyped: serverTimestamp(),
-      });
+      }, { merge: true });
     } catch (error) {
       console.error('Error sending message: ', error);
     }
-  }, [auth.currentUser.uid, user.uid, firestore, participantIds]);
+  }, [auth.currentUser.uid, user.uid, firestore, participantIds, publicKey]);
 
   const handleInputTextChanged = async (text) => {
     const typingDocRef = doc(firestore, 'typingStatus', participantIds);
@@ -145,18 +297,6 @@ const ChatScreen = () => {
     }
   };
 
-  const uploadFile = async (uri, fileType) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const storage = getStorage(app);
-    const fileRef = ref(storage, `${fileType}/${new Date().getTime()}_${auth.currentUser.uid}`);
-
-    await uploadBytes(fileRef, blob);
-    const downloadURL = await getDownloadURL(fileRef);
-
-    return downloadURL;
-  };
-
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -165,20 +305,32 @@ const ChatScreen = () => {
         quality: 1,
       });
 
-      if (!result.cancelled) {
-        console.log('Image picked:', result.uri);
-        const fileURL = await uploadFile(result.uri, 'images');
-        const message = {
-          _id: new Date().getTime().toString(),
-          createdAt: new Date(),
-          user: {
-            _id: auth.currentUser.uid,
-            name: username,
-            avatar: profilePicture || './assets/profilepic.jpg',
-          },
-          text: '',
-        };
-        onSend([message], fileURL, 'image');
+      console.log('Image picker result:', result);
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const imageUri = result.assets[0].uri;
+        console.log('Image picked:', imageUri);
+
+        try {
+          const fileURL = await uploadFile(imageUri, 'images');
+          console.log('File URL:', fileURL);
+
+          const message = {
+            _id: new Date().getTime().toString(),
+            createdAt: new Date(),
+            user: {
+              _id: auth.currentUser.uid,
+              name: username,
+              avatar: profilePicture || './assets/profilepic.jpg',
+            },
+            text: '',
+          };
+          onSend([message], fileURL, 'image');
+        } catch (uploadError) {
+          console.error('Error uploading file:', uploadError);
+        }
+      } else {
+        console.log('Image picking canceled or assets are missing');
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -187,28 +339,70 @@ const ChatScreen = () => {
 
   const pickDocument = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync();
+      console.log('Picking document...');
+      const result = await DocumentPicker.getDocumentAsync(
+        {
+          type: '*/*',
+          copyToCacheDirectory: true,
+          multiple: false,
+        }
+      );
 
-      if (result.type === 'success') {
-        console.log('Document picked:', result.uri);
-        const fileURL = await uploadFile(result.uri, 'documents');
-        const message = {
-          _id: new Date().getTime().toString(),
-          createdAt: new Date(),
-          user: {
-            _id: auth.currentUser.uid,
-            name: username,
-            avatar: profilePicture || './assets/profilepic.jpg',
-          },
-          text: '',
-        };
-        onSend([message], fileURL, 'document');
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const fileUri = result.assets[0].uri;
+
+        try {
+
+          const fileURL = await uploadFile(fileUri, 'documents');
+          console.log('File URL obtained:', fileURL);
+          const message = {
+            _id: new Date().getTime().toString(),
+            createdAt: new Date(),
+            user: {
+              _id: auth.currentUser.uid,
+              name: username,
+              avatar: profilePicture || './assets/profilepic.jpg',
+            },
+            text: '',
+          };
+          onSend([message], fileURL, 'document');
+          console.log('Document message sent');
+        } catch (uploadError) {
+          console.error('Error uploading document:', uploadError);
+        }
+      } else {
+        console.log('Document picking canceled or assets are missing');
       }
     } catch (error) {
       console.error('Error picking document:', error);
     }
   };
 
+  const uploadFile = async (uri, fileType) => {
+    try {
+      console.log('Fetching file from URI:', uri);
+      const response = await fetch(uri);
+
+      console.log('Fetch response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`Fetch failed with status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const storage = getStorage(app);
+      const fileRef = ref(storage, `${fileType}/${new Date().getTime()}_${auth.currentUser.uid}`);
+
+      await uploadBytes(fileRef, blob);
+      const downloadURL = await getDownloadURL(fileRef);
+
+      console.log('File uploaded successfully, download URL:', downloadURL);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error in uploadFile:', error);
+      throw error;
+    }
+  };
 
   const HeaderWithPicture = ({ username, profilePicture }) => {
     return (
@@ -229,24 +423,32 @@ const ChatScreen = () => {
           fontSize: 20,
           fontFamily: 'TitilliumWeb_600SemiBold',
         }}>{username}</Text>
-        <FontAwesomeIcon
-          icon={faPhone}
-          size={21}
-          color='#fff'
+        <Pressable
           style={{
             position: 'absolute',
             right: 140,
           }}
-        />
-        <FontAwesomeIcon
-          icon={faVideo}
-          size={25}
-          color='#fff'
+          onPress={AudioC}
+        >
+          <FontAwesomeIcon
+            icon={faPhone}
+            size={21}
+            color='#fff'
+          />
+        </Pressable>
+        <Pressable
           style={{
             position: 'absolute',
             right: 90,
           }}
-        />
+          onPress={VideoC}
+        >
+          <FontAwesomeIcon
+            icon={faVideo}
+            size={25}
+            color='#fff'
+          />
+        </Pressable>
       </View>
     );
   };
@@ -270,29 +472,54 @@ const ChatScreen = () => {
           {...props}
           wrapperStyle={{
             right: {
-              backgroundColor: '#4c669f',
+              backgroundColor: '#fff',
+              paddingHorizontal: 5,
             },
             left: {
-              backgroundColor: '#f0ceff',
+              backgroundColor: '#fff',
+              paddingHorizontal: 5,
             },
           }}
+          renderTime={
+            () => <Text style={[
+              props.position === 'left' ? styles.timeLeft : styles.timeRight,
+              styles.timeText,
+            ]}>{props.currentMessage.createdAt.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}</Text>
+          }
         />
         {props.currentMessage.fileType === 'image' && (
           <Image
             source={{ uri: props.currentMessage.file }}
-            style={{ width: 200, height: 200, borderRadius: 10, marginTop: 5 }}
+            style={{
+              width: 200,
+              height: 200,
+              borderRadius: 20,
+              marginTop: 5,
+            }}
           />
         )}
         {props.currentMessage.fileType === 'document' && (
           <Text
             style={{
-              color: '#0000EE',
+              color: '#4c669f',
+              marginVertical: 10,
+              backgroundColor: '#fff',
               textDecorationLine: 'underline',
-              marginTop: 5,
+              border: 1,
+              borderColor: '#000',
+              borderRadius: 22,
+              paddingHorizontal: 15,
+              paddingBottom: 5,
+              paddingTop: 5,
+              fontSize: 16,
+              fontFamily: 'TitilliumWeb_400Regular',
             }}
             onPress={() => Linking.openURL(props.currentMessage.file)}
           >
-            Open Document
+            View Document.
           </Text>
         )}
       </View>
@@ -304,75 +531,133 @@ const ChatScreen = () => {
       <InputToolbar
         {...props}
         containerStyle={{
-          backgroundColor: '#4c669f',
+          // backgroundColor: '#4c669f',
           maxHeight: 60,
           overflow: 'hidden',
         }}
         renderComposer={(composerprops) => (
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: 15 }}>
             <Pressable
               onPress={pickImage}
               style={{
+                marginLeft: 1,
                 marginRight: 10,
+                borderWidth: 1,
+                borderColor: '#000',
+                borderRadius: 5,
+                padding: 5,
               }}
             >
-              <FontAwesomeIcon icon={faImage} size={20} color='white' />
+              <FontAwesomeIcon icon={faImage} size={20} color='#000' />
             </Pressable>
             <Pressable
               onPress={pickDocument}
               style={{
-                marginRight: 10,
+                marginLeft: 3,
+                marginRight: 5,
+                borderWidth: 1,
+                borderColor: '#000',
+                borderRadius: 5,
+                padding: 5,
               }}
             >
-              <FontAwesomeIcon icon={faPaperclip} size={20} color='white' />
+              <FontAwesomeIcon icon={faPaperclip} size={20} color='#000' />
             </Pressable>
             <Composer
               {...composerprops}
               textInputStyle={{
-                color: '#fff',
+                color: '#000',
                 fontFamily: 'TitilliumWeb_400Regular',
                 flex: 1,
                 multiline: true,
               }}
-              placeholderTextColor='#fff'
+              placeholderTextColor='#000'
             />
           </View>
-        )
-        }
+        )}
       />
     );
-  }
+  };
 
   const renderSend = (props) => {
     return (
       <Send {...props}>
         <View style={{
-          marginRight: 20,
-          marginBottom: 10,
+          marginRight: 10,
+          marginBottom: 5,
+          borderWidth: 1,
+          borderColor: '#000',
+          borderRadius: 5,
+          padding: 5,
         }}>
-          <FontAwesomeIcon icon={faPaperPlane} size={20} color='white' />
+          <FontAwesomeIcon icon={faPaperPlane} size={20} color='#000' />
         </View>
       </Send>
     );
-  }
+  };
 
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={messages => onSend(messages)}
-      user={{
-        _id: auth.currentUser.uid,
-        name: username,
-        avatar: profilePicture || './assets/profilepic.jpg',
-      }}
-      renderBubble={CustomBubble}
-      isTyping={isTyping}
-      onInputTextChanged={handleInputTextChanged}
-      renderMessageText={CustomMessageText}
-      renderInputToolbar={CustomInputToolbar}
-      renderAvatarOnTop={true}
-      renderSend={renderSend}
-    />
+    <LinearGradient
+      colors={['#4c669f', '#f0ceff']}
+      style={{ flex: 1 }}
+      start={[0.5, 0.5]}
+    >
+      <GiftedChat
+        messages={messages}
+        onSend={messages => onSend(messages)}
+        user={{
+          _id: auth.currentUser.uid,
+          name: username,
+          avatar: profilePicture || './assets/profilepic.jpg',
+        }}
+        renderBubble={CustomBubble}
+        isTyping={isTyping}
+        onInputTextChanged={handleInputTextChanged}
+        renderMessageText={CustomMessageText}
+        renderInputToolbar={CustomInputToolbar}
+        renderAvatarOnTop={false}
+        renderSend={renderSend}
+        showAvatarForEveryMessage={false}
+        renderDay={props => <Day {...props} textStyle={{
+          color: '#fff',
+          fontFamily: 'TitilliumWeb_400Regular',
+          fontSize: 16,
+        }}
+        />}
+        // renderUsernameOnMessage={true}
+        renderChatEmpty={() => (
+          <View style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            transform: [{ rotate: '180deg' }],
+          }}>
+            <Image
+              source={{ uri: user.profilePicture }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                marginBottom: 20,
+                borderWidth: 3,
+                borderColor: '#fff',
+              }}
+            />
+            <Text style={{
+              fontFamily: 'TitilliumWeb_600SemiBold',
+              fontSize: 25,
+              color: '#fff',
+            }}>{user.username}</Text>
+            <Text style={{
+              fontFamily: 'TitilliumWeb_400Regular',
+              fontSize: 16,
+              color: '#fff',
+              marginTop: 5,
+            }}>Start a conversation!</Text>
+          </View>
+        )}
+      />
+    </LinearGradient>
   );
 };
 
@@ -381,11 +666,22 @@ const styles = StyleSheet.create({
     fontFamily: 'TitilliumWeb_400Regular'
   },
   textLeft: {
-    color: '#000', // Text color for received messages
+    color: '#000',
   },
   textRight: {
-    color: '#fff', // Text color for sent messages
+    color: '#000',
   },
-})
+  timeText: {
+    fontSize: 10,
+    fontFamily: 'TitilliumWeb_400Regular',
+    marginHorizontal: 6,
+  },
+  timeLeft: {
+    color: '#555',
+  },
+  timeRight: {
+    color: '#555',
+  },
+});
 
 export default ChatScreen;
