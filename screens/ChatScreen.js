@@ -45,8 +45,8 @@ const ChatScreen = () => {
         // Fetch public key from Firestore
         const publicKeyDoc = await getDoc(doc(firestore, 'users', user.uid));
         if (publicKeyDoc.exists()) {
-          console.log('Public key fetched successfully', publicKey);
           setPublicKey(publicKeyDoc.data().publicKey);
+          console.log('Public key fetched successfully', publicKeyDoc.data().publicKey);
         } else {
           console.error('Public key not found');
         }
@@ -118,8 +118,10 @@ const ChatScreen = () => {
               const buffer = Buffer.from(data.text, 'base64');
               decryptedText = QuickCrypto.privateDecrypt(privateKey, buffer).toString('utf8');
               console.log('Decrypted text:', decryptedText);
+              console.log('Decryption successful');
             } catch (error) {
               console.error('Error decrypting text:', error.message);
+              console.error('Decryption failed')
             }
           }
 
@@ -149,7 +151,7 @@ const ChatScreen = () => {
     } else {
       console.error('Current user or chat participant is missing a UID');
     }
-  }, [firestore, auth.currentUser, user, participantIds]);
+  }, [firestore, auth.currentUser, user, participantIds, privateKey]);
 
   useLayoutEffect(() => {
     if (auth.currentUser && user && user.uid) {
@@ -186,8 +188,16 @@ const ChatScreen = () => {
     try {
       let encryptedText = '';
       if (text) {
-        const buffer = Buffer.from(text, 'utf8');
-        encryptedText = QuickCrypto.publicEncrypt(publicKey, buffer).toString('base64');
+        try {
+
+          const buffer = Buffer.from(text, 'utf8');
+          encryptedText = QuickCrypto.publicEncrypt(publicKey, buffer).toString('base64');
+          console.log('Encrypted text:', encryptedText)
+          console.log('Encryption successful');
+        } catch (error) {
+          console.error('Error encrypting text:', error.message);
+          console.error('Encryption failed');
+        }
       }
 
       const messageData = {
@@ -213,7 +223,7 @@ const ChatScreen = () => {
     } catch (error) {
       console.error('Error sending message: ', error);
     }
-  }, [auth.currentUser.uid, user.uid, firestore, participantIds]);
+  }, [auth.currentUser.uid, user.uid, firestore, participantIds, publicKey]);
 
   const handleInputTextChanged = async (text) => {
     const typingDocRef = doc(firestore, 'typingStatus', participantIds);
