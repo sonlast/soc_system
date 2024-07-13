@@ -13,8 +13,8 @@ import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import crypto from 'react-native-quick-crypto';
-const crypto = require('node:crypto'); 
+import crypto from 'react-native-quick-crypto';
+import RSA from 'react-native-rsa-native';
 global.Buffer = require('buffer').Buffer;
 
 const ChatScreen = () => {
@@ -117,8 +117,8 @@ const ChatScreen = () => {
               const buffer = Buffer.from(data.text, 'base64');
               console.log('Encrypted text:', data.text);
               console.log('Private key:', privateKey);
-              decryptedText = crypto.privateDecrypt(privateKey, buffer).toString('utf8'); //! LOGS STOP HERE
-              // decryptedText = buffer.toString('utf8'); 
+              // decryptedText = crypto.privateDecrypt(privateKey, buffer).toString('utf8'); //! LOGS STOP HERE
+              decryptedText = buffer.toString('utf8');
               console.log('Decrypted text:', decryptedText);
               console.log('Decryption successful');
             } catch (error) {
@@ -195,8 +195,8 @@ const ChatScreen = () => {
           const buffer = Buffer.from(text, 'utf8');
           console.log('Text to encrypt:', text);
           console.log('Public key:', publicKey);
-          encryptedText = crypto.publicEncrypt(publicKey, buffer).toString('base64');
-          // encryptedText = buffer.toString('base64');
+          // encryptedText = crypto.publicEncrypt(publicKey, buffer).toString('base64'); //! COMMENTED JUST FOR COMPATIBILITY TO THE UNSUCCESSFUL DECRYPTION IN LINE 120
+          encryptedText = buffer.toString('base64');
           console.log('Encrypted text:', encryptedText)
           console.log('Encryption successful');
         } catch (error) {
