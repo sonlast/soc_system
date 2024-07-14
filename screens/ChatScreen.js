@@ -14,8 +14,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-get-random-values';
-import crypto from 'react-native-quick-crypto';
-import RSA from 'react-native-rsa-native';
+import crypto from 'react-native-quick-crypto'; //! UNUSED DUE TO COMMENTED IMPLEMENTATION
+// import RSA from 'react-native-rsa-native'; //! UNUSED DUE TO UNSUCCESSFUL DECRYPTION
 global.Buffer = require('buffer').Buffer;
 
 const ChatScreen = () => {
