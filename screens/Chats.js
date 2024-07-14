@@ -6,11 +6,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { Avatar } from 'react-native-elements';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit, orderBy } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 import { SearchBar } from '@rneui/themed';
 
-const Item = ({ user, onPress }) => (
+const Item = ({ user, auth, onPress }) => (
   <Pressable onPress={() => onPress(user)}>
     <View style={styles.item}>
       <View style={{
@@ -26,13 +26,23 @@ const Item = ({ user, onPress }) => (
             fontFamily: 'TitilliumWeb_400Regular',
             fontSize: 20,
             paddingLeft: 10,
-            paddingVertical: 10,
+            paddingTop: 5,
             textAlignVertical: 'center',
           }}>{user.username}</Text>
+          <Text style={{
+            fontFamily: 'TitilliumWeb_400Regular',
+            fontSize: 15,
+            paddingLeft: 10,
+            paddingBottom: 5,
+            textAlignVertical: 'center',
+            color: '#777',
+          }}>
+            {user.recentMessage || 'No messages yet'}
+          </Text>
         </View>
       </View>
     </View>
-  </Pressable>
+  </Pressable >
 );
 
 const Chats = () => {
@@ -41,17 +51,51 @@ const Chats = () => {
   const firestore = getFirestore(app);
   const [userInput, setUserInput] = useState('');
   const [users, setUsers] = useState([]);
+  const [lastClickedUser, setLastClickedUser] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
 
-  const fetchUsers = async () => {
+  // const fetchUsers = async () => {
+  //   try {
+  //     const usersCollection = collection(firestore, 'users');
+  //     const userSnapshot = await getDocs(usersCollection);
+  //     const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  //     setUsers(userList);
+  //     setFilteredUsers(userList);
+  //   } catch (error) {
+  //     console.error('Error fetching users: ', error);
+  //   }
+  // };
+
+  const fetchUsersWithRecentMessages = async () => {
     try {
       const usersCollection = collection(firestore, 'users');
       const userSnapshot = await getDocs(usersCollection);
-      const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const userList = await Promise.all(
+        userSnapshot.docs.map(async (doc) => {
+          const userData = doc.data();
+          const participantIds = [auth.currentUser.uid, doc.id].sort().join('_');
+          const recentMessageQuery = query(
+            collection(firestore, 'chats'),
+            where('participants', '==', participantIds),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          );
+          const recentMessageSnapshot = await getDocs(recentMessageQuery);
+          const recentMessageData = recentMessageSnapshot.docs.length
+            ? recentMessageSnapshot.docs[0].data()
+            : { text: '', sender: '' };
+
+          return {
+            id: doc.id,
+            ...userData,
+            recentMessage: recentMessageData.text,
+          };
+        })
+      );
       setUsers(userList);
       setFilteredUsers(userList);
     } catch (error) {
-      console.error('Error fetching users: ', error);
+      console.error('Error fetching users with recent messages: ', error);
     }
   };
 
@@ -76,7 +120,8 @@ const Chats = () => {
   useFocusEffect(
     useCallback(() => {
       fetchProfilePicture();
-      fetchUsers();
+      // fetchUsers();
+      fetchUsersWithRecentMessages();
       const onBackPress = () => {
         BackHandler.exitApp();
         return true;
@@ -99,7 +144,7 @@ const Chats = () => {
 
   const handleUserPress = (user) => {
     if (user.uid) {
-
+      setLastClickedUser(user.id);
       navigation.navigate('ChatScreen', { user, username: user.username, profilePicture: user.profilePicture, uid: user.uid });
     } else {
       console.error('User does not have a valid UID');
@@ -115,6 +160,12 @@ const Chats = () => {
   if (!fontsLoaded && !fontError) {
     return null;
   }
+
+  const sortedUsers = filteredUsers.slice().sort((a, b) => {
+    if (a.id === lastClickedUser) return -1;
+    if (b.id === lastClickedUser) return 1;
+    return 0;
+  });
 
   return (
     <View style={styles.container}>
@@ -178,7 +229,7 @@ const Chats = () => {
         ) : (
           <FlatList
             showsVerticalScrollIndicator={false}
-            data={filteredUsers}
+            data={sortedUsers}
             renderItem={({ item }) => <Item user={item} onPress={handleUserPress} />}
             keyExtractor={item => item.id}
             style={{ marginTop: 10, paddingBottom: 10 }}

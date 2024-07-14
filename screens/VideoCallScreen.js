@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Image, Text, StyleSheet, Pressable } from 'react-native';
 import { RTCView, mediaDevices, RTCPeerConnection, RTCSessionDescription } from 'react-native-webrtc';
 import io from 'socket.io-client';
+import { app } from '../firebaseConfig';
+import { getFirestore, addDoc, collection } from 'firebase/firestore';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPhoneSlash, faPhone, faMicrophone, faMicrophoneSlash, faVideo, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
 
@@ -15,6 +17,7 @@ const VideoCallScreen = ({ route, navigation }) => {
   const [isCameraOn, setIsCameraOn] = useState(true);
   const socketRef = useRef(null);
   const pcRef = useRef(null);
+  const firestore = getFirestore(app);
 
   useEffect(() => {
     const initializeSocket = () => {
@@ -116,8 +119,22 @@ const VideoCallScreen = ({ route, navigation }) => {
         pcRef.current.addTrack(track, stream);
       });
       setCallStarted(true);
+      await saveCallDetails();
     } catch (error) {
       console.error('Error starting local stream:', error);
+    }
+  };
+
+  const saveCallDetails = async () => {
+    try {
+      const callDetails = {
+        username: user.username,
+        profilePicture: user.profilePicture,
+        timestamp: new Date(),
+      };
+      await addDoc(collection(firestore, 'calls'), callDetails);
+    } catch (error) {
+      console.error('Error saving call details:', error);
     }
   };
 

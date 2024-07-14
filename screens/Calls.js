@@ -1,31 +1,55 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Avatar } from 'react-native-elements';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
+import { SearchBar } from '@rneui/themed';
 
-const Item = ({ name }) => (
+const Item = ({ user }) => (
   <View style={styles.item}>
-    <View>
-      <Text style={styles.title}>{name}</Text>
+    <View style={{
+      flexDirection: 'row',
+      paddingVertical: 2.5,
+      paddingHorizontal: 5,
+    }}>
+      <View>
+        <Avatar size={48} rounded source={user.profilePicture ? { uri: user.profilePicture } : require('../assets/profilepic.jpg')} />
+      </View>
+      <View>
+        <Text style={{
+          fontFamily: 'TitilliumWeb_400Regular',
+          fontSize: 20,
+          paddingLeft: 10,
+          paddingVertical: 10,
+          textAlignVertical: 'center',
+        }}>{user.username}</Text>
+      </View>
     </View>
   </View>
 );
-
-const calls = [
-  // {
-  //   id: '1',
-  //   name: 'John Doe',
-  // }
-]
 
 const Calls = () => {
   const [profilePicture, setProfilePicture] = useState('');
   const auth = getAuth(app);
   const firestore = getFirestore(app);
+  const [userInput, setUserInput] = useState('');
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+
+  const fetchCalls = async () => {
+    try {
+      const callsCollection = collection(firestore, 'calls');
+      const callSnapshot = await getDocs(callsCollection);
+      const callList = callSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUsers(callList);
+      setFilteredUsers(callList);
+    } catch (error) {
+      console.error('Error fetching calls: ', error);
+    }
+  };
 
   const fetchProfilePicture = async () => {
     try {
@@ -45,27 +69,29 @@ const Calls = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProfilePicture();
-    const backAction = () => {
-      navigation.navigate("Chats");
-      return true;
-    };
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfilePicture();
+      fetchCalls();
+      const onBackPress = () => {
+        BackHandler.exitApp();
+        return true;
+      };
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
-    return () => backHandler.remove();
-  }, []);
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
+
+  const navigation = useNavigation();
 
   let [fontsLoaded, fontError] = useFonts({
     TitilliumWeb_400Regular,
     TitilliumWeb_600SemiBold,
   });
 
-  const navigation = useNavigation();
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -96,25 +122,47 @@ const Calls = () => {
             />
           </Pressable>
           <Text style={styles.textheader}>
-            Safe-on-chat
+            Safe-On-Chat
           </Text>
         </View>
-        { calls.length === 0 ? (
-
+        <View styles={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          margin: 50,
+        }}>
+          <SearchBar
+            round
+            searchIcon={{ size: 24 }}
+            placeholder="Search"
+            onChangeText={(text) => setUserInput(text)}
+            value={userInput}
+            containerStyle={{
+              backgroundColor: 'transparent',
+              borderBottomWidth: 0,
+              borderTopWidth: 0,
+            }}
+            inputStyle={{
+              fontFamily: 'TitilliumWeb_400Regular',
+            }}
+            underlineColorAndroid={'transparent'}
+          />
+        </View>
+        {filteredUsers.length === 0 ? (
           <View style={{
             flex: 1,
             marginTop: 125,
           }}>
-          <Text style={styles.temp_text}>Your Call History Is Empty. </Text>
-          <Text style={styles.temp_text}>Initiate Your First Call. </Text>
-        </View>
+            <Text style={styles.temp_text}>Your Call History Is Empty. </Text>
+            <Text style={styles.temp_text}>Initiate Your First Call. </Text>
+          </View>
         ) : (
           <FlatList
             showsVerticalScrollIndicator={false}
-            data={calls}
-            renderItem={({ item }) => <Item name={item.name} />}
+            data={filteredUsers}
+            renderItem={({ item }) => <Item user={item} />}
             keyExtractor={item => item.id}
-            style={{ marginTop: 30, paddingBottom: 10 }}
+            style={{ marginTop: 10, paddingBottom: 10 }}
           />
         )}
       </View>
@@ -131,13 +179,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 40,
     paddingBottom: 0,
+    paddingLeft: 10,
     padding: 10,
   },
   textheader: {
     fontFamily: 'TitilliumWeb_400Regular',
     fontSize: 25,
     color: 'hsl(0, 0%, 100%)',
-    // marginTop: 6,
     textAlignVertical: 'center',
     marginLeft: 10,
   },
@@ -157,9 +205,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
   },
+  //!  FOR THE FLATLIST
   item: {
     flexDirection: 'row',
-    backgroundColor: '#f9c2ff',
+    backgroundColor: '#eef',
     paddingLeft: 10,
     padding: 5,
     marginVertical: 10,

@@ -13,6 +13,7 @@ import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'react-native-get-random-values';
 import crypto from 'react-native-quick-crypto';
 import RSA from 'react-native-rsa-native';
 global.Buffer = require('buffer').Buffer;
@@ -111,25 +112,26 @@ const ChatScreen = () => {
         const messagesFirestore = snapshot.docs.map((doc) => {
           const data = doc.data();
 
-          let decryptedText = '';
-          if (data.text) {
-            try {
-              const buffer = Buffer.from(data.text, 'base64');
-              console.log('Encrypted text:', data.text);
-              console.log('Private key:', privateKey);
-              // decryptedText = crypto.privateDecrypt(privateKey, buffer).toString('utf8'); //! LOGS STOP HERE
-              decryptedText = buffer.toString('utf8');
-              console.log('Decrypted text:', decryptedText);
-              console.log('Decryption successful');
-            } catch (error) {
-              console.error('Error decrypting text:', error.message);
-              console.error('Decryption failed')
-            }
-          }
+          // let decryptedText = '';
+          // if (data.text) {
+          //   try {
+          //     const buffer = Buffer.from(data.text, 'base64');
+          //     console.log('Encrypted text:', data.text);
+          //     console.log('Private key:', privateKey);
+          //     // decryptedText = crypto.privateDecrypt(privateKey, buffer).toString('utf8'); //! LOGS STOP HERE
+          //     decryptedText = buffer.toString('utf8');
+          //     console.log('Decrypted text:', decryptedText);
+          //     console.log('Decryption successful');
+          //   } catch (error) {
+          //     console.error('Error decrypting text:', error.message);
+          //     console.error('Decryption failed')
+          //   }
+          // }
 
           return {
             _id: doc.id,
-            text: decryptedText,
+            // text: decryptedText,
+            text: data.text,
             createdAt: data.createdAt.toDate(),
             user: {
               _id: data.user._id,
@@ -189,26 +191,26 @@ const ChatScreen = () => {
 
     try {
 
-      let encryptedText = '';
-      if (text) {
-        try {
-          const buffer = Buffer.from(text, 'utf8');
-          console.log('Text to encrypt:', text);
-          console.log('Public key:', publicKey);
-          // encryptedText = crypto.publicEncrypt(publicKey, buffer).toString('base64'); //! COMMENTED JUST FOR COMPATIBILITY TO THE UNSUCCESSFUL DECRYPTION IN LINE 120
-          encryptedText = buffer.toString('base64');
-          console.log('Encrypted text:', encryptedText)
-          console.log('Encryption successful');
-        } catch (error) {
-          console.error('Error encrypting text:', error.message);
-          console.error('Encryption failed');
-        }
-      }
+      // let encryptedText = '';
+      // if (text) {
+      //   try {
+      //     const buffer = Buffer.from(text, 'utf8');
+      //     console.log('Text to encrypt:', text);
+      //     console.log('Public key:', publicKey);
+      //     // encryptedText = crypto.publicEncrypt(publicKey, buffer).toString('base64'); //! COMMENTED JUST FOR COMPATIBILITY TO THE UNSUCCESSFUL DECRYPTION IN LINE 120
+      //     encryptedText = buffer.toString('base64');
+      //     console.log('Encrypted text:', encryptedText)
+      //     console.log('Encryption successful');
+      //   } catch (error) {
+      //     console.error('Error encrypting text:', error.message);
+      //     console.error('Encryption failed');
+      //   }
+      // }
 
       const messageData = {
         _id,
         createdAt: new Date(),
-        text: fileURL ? '' : encryptedText,
+        text: fileURL ? '' : text,
         user: {
           _id: sender._id,
           name: sender._id === auth.currentUser.uid ? username : user.username,
