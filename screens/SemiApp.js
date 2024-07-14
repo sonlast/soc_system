@@ -218,17 +218,18 @@ const DrawerNavigator = () => {
           drawerLabel: 'Chats',
         }}
       />
-      <Drawer.Screen
-        name="Settings"
-        component={Settings}
-        options={{
-          headerShown: false,
-          drawerLabel: 'Settings',
-        }}
-      />
     </Drawer.Navigator>
   );
 };
+
+{/* <Drawer.Screen */ }
+//   name="Settings"
+//   component={Settings}
+//   options={{
+//     headerShown: false,
+//     drawerLabel: 'Settings',
+//   }}
+// />
 
 const App = () => {
   return (
