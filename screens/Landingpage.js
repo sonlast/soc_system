@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   logo: {
-    marginTop: 200,
+    marginTop: 125,
     width: 300,
     height: 300,
     alignSelf: 'center',

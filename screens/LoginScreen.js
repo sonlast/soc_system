@@ -170,7 +170,7 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    // justifyContent: 'center',
   },
   linearg: {
     position: 'absolute',
@@ -194,9 +194,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   logo: {
+    marginTop: 85,
     width: 250,
     height: 250,
-    alignSelf: 'center',
+    alignSelf: 'center'
   },
   loginbutton: {
     marginTop: 30,

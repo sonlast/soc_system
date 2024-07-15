@@ -11,6 +11,7 @@ import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 // import QuickCrypto from 'react-native-quick-crypto';
 import RSA from 'react-native-rsa-native';
 
@@ -73,7 +74,8 @@ const RegisterScreen = () => {
     const keys = await RSA.generateKeys(2048);
     const { public: publicKey, private: privateKey } = keys;
 
-    await AsyncStorage.setItem('privateKey', privateKey);
+    // await AsyncStorage.setItem('privateKey', privateKey);
+    await SecureStore.setItemAsync('privateKey', privateKey);
     return publicKey;
   }
 

@@ -74,7 +74,8 @@ export default function App() {
       //* Video Call
       //? Audio Call
 //TODO: Other Security Features
-      //TODO: Twofish / RSA Encryption
+      //TODO: RSA Encryption
+      //TODO: Twofish Encryption
 //TODO: Modify Algorithm
 
 //! --------------------------------- THESIS FEATURES
@@ -83,20 +84,18 @@ export default function App() {
       //* Images
       //* Document (different file types)
 //TODO: Group chats
-//TODO: Voice Message
-//TODO: Video Message
+//? Voice Message
+//? Video Message
 //? Picture
 //TODO: Data Encryption
 //TODO: Multimedia
       //TODO: Audio
 
-
 //! TASKS for Tomorrow
 //! - implement RSA / TwoFish Encryption
-//! - margin / padding top
-//TODO: - list calls in chat tab
-//TODO: - encrypt messages
-//TODO: - recent message in chat
+//TODO: - encrypt/decrypt messages
+//TODO: - encrypt/decrypt recent message in chat
+//TODO: - modify calls tab ui (filtering)
 //TODO: - group chat 
 //TODO: - voice message
 //TODO: - video message
@@ -104,7 +103,7 @@ export default function App() {
 //? - navigation handling
 //? - configure pin for global storage
 
-// AGENDA
-//! Red for Priority
-//TODO: Orange for Secondary
-//? Blue for Secondary
+//! --------------- UNUSED SCREENS / COMPONENTS --------------- //
+// - SearchChat.js (Screen)
+// - SettingsScreen.js (Screen)
+// - Header.js (Component)

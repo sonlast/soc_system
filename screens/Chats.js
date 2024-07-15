@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 15,
     paddingBottom: 0,
     paddingLeft: 10,
     padding: 10,

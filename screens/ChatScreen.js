@@ -13,6 +13,7 @@ import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import 'react-native-get-random-values';
 import crypto from 'react-native-quick-crypto'; //! UNUSED DUE TO COMMENTED IMPLEMENTATION
 import RSA from 'react-native-rsa-native'; //! UNUSED DUE TO UNSUCCESSFUL DECRYPTION
@@ -42,7 +43,7 @@ const ChatScreen = () => {
   useEffect(() => {
     const fetchKeys = async () => {
       try {
-        // Fetch public key from Firestore
+        //! Fetch public key from Firestore
         const publicKeyDoc = await getDoc(doc(firestore, 'users', user.uid));
         if (publicKeyDoc.exists()) {
           setPublicKey(publicKeyDoc.data().publicKey);
@@ -51,8 +52,11 @@ const ChatScreen = () => {
           console.error('Public key not found');
         }
 
-        // Fetch private key from AsyncStorage
-        const privateKey = await AsyncStorage.getItem('privateKey');
+        //! Fetch private key from AsyncStorage
+        // const privateKey = await AsyncStorage.getItem('privateKey');
+
+        //! Fetch private key from SecureStore
+        const privateKey = await SecureStore.getItemAsync('privateKey');
         if (privateKey) {
           console.log('Private key fetched successfully', privateKey);
           setPrivateKey(privateKey);
