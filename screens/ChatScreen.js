@@ -15,7 +15,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-get-random-values';
 import crypto from 'react-native-quick-crypto'; //! UNUSED DUE TO COMMENTED IMPLEMENTATION
-// import RSA from 'react-native-rsa-native'; //! UNUSED DUE TO UNSUCCESSFUL DECRYPTION
+import RSA from 'react-native-rsa-native'; //! UNUSED DUE TO UNSUCCESSFUL DECRYPTION
 global.Buffer = require('buffer').Buffer;
 
 const ChatScreen = () => {
@@ -65,7 +65,29 @@ const ChatScreen = () => {
     };
 
     fetchKeys();
-  }, [firestore, user.uid]);
+  }, []);
+
+  // const encryptMessage = async (message, publicKey) => {
+  //   try {
+  //     const encryptedMessage = await RSA.encrypt(message, publicKey);
+  //     console.log('Encrypted text:', encryptedMessage);
+  //     return encryptedMessage;
+  //   } catch (error) {
+  //     console.error('Error encrypting text:', error.message);
+  //     throw error;
+  //   }
+  // };
+
+  // const decryptMessage = async (encryptedMessage, privateKey) => {
+  //   try {
+  //     const decryptedMessage = await RSA.decrypt(encryptedMessage, privateKey);
+  //     console.log('Decrypted text:', decryptedMessage);
+  //     return decryptedMessage;
+  //   } catch (error) {
+  //     console.error('Error decrypting text:', error.message);
+  //     throw error;
+  //   }
+  // };
 
   useEffect(() => {
     const activateScreenCapture = async () => {
@@ -108,30 +130,39 @@ const ChatScreen = () => {
         orderBy('createdAt', 'desc')
       );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const messagesFirestore = snapshot.docs.map((doc) => {
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const messagesFirestore = await Promise.all(snapshot.docs.map(async (doc) => {
           const data = doc.data();
+
+          let decryptedText = '';
+          if (data.text) {
+            try {
+              const buffer = Buffer.from(data.text, 'base64');
+              console.log('Encrypted text:', data.text);
+              console.log('Private key:', privateKey);
+              // decryptedText = crypto.privateDecrypt(privateKey, buffer).toString('utf8'); //! LOGS STOP HERE
+              decryptedText = buffer.toString('utf8');
+              console.log('Decrypted text:', decryptedText);
+              console.log('Decryption successful');
+            } catch (error) {
+              console.error('Error decrypting text:', error.message);
+              console.error('Decryption failed')
+            }
+          }
 
           // let decryptedText = '';
           // if (data.text) {
           //   try {
-          //     const buffer = Buffer.from(data.text, 'base64');
-          //     console.log('Encrypted text:', data.text);
-          //     console.log('Private key:', privateKey);
-          //     // decryptedText = crypto.privateDecrypt(privateKey, buffer).toString('utf8'); //! LOGS STOP HERE
-          //     decryptedText = buffer.toString('utf8');
-          //     console.log('Decrypted text:', decryptedText);
-          //     console.log('Decryption successful');
+          //     decryptedText = await decryptMessage(data.text, privateKey);
           //   } catch (error) {
           //     console.error('Error decrypting text:', error.message);
-          //     console.error('Decryption failed')
           //   }
-          // }
+          // } 
 
           return {
             _id: doc.id,
-            // text: decryptedText,
-            text: data.text,
+            text: decryptedText,
+            // text: data.text,
             createdAt: data.createdAt.toDate(),
             user: {
               _id: data.user._id,
@@ -145,7 +176,7 @@ const ChatScreen = () => {
             file: data.file || null,
             fileType: data.fileType || null,
           };
-        });
+        }));
         setMessages(messagesFirestore);
       });
 
@@ -191,26 +222,31 @@ const ChatScreen = () => {
 
     try {
 
+      let encryptedText = '';
+      if (text) {
+        try {
+          const buffer = Buffer.from(text, 'utf8');
+          console.log('Text to encrypt:', text);
+          console.log('Public key:', publicKey);
+          // encryptedText = crypto.publicEncrypt(publicKey, buffer).toString('base64'); //! COMMENTED JUST FOR COMPATIBILITY TO THE UNSUCCESSFUL DECRYPTION IN LINE 120
+          encryptedText = buffer.toString('base64');
+          console.log('Encrypted text:', encryptedText)
+          console.log('Encryption successful');
+        } catch (error) {
+          console.error('Error encrypting text:', error.message);
+          console.error('Encryption failed');
+        }
+      }
+
       // let encryptedText = '';
       // if (text) {
-      //   try {
-      //     const buffer = Buffer.from(text, 'utf8');
-      //     console.log('Text to encrypt:', text);
-      //     console.log('Public key:', publicKey);
-      //     // encryptedText = crypto.publicEncrypt(publicKey, buffer).toString('base64'); //! COMMENTED JUST FOR COMPATIBILITY TO THE UNSUCCESSFUL DECRYPTION IN LINE 120
-      //     encryptedText = buffer.toString('base64');
-      //     console.log('Encrypted text:', encryptedText)
-      //     console.log('Encryption successful');
-      //   } catch (error) {
-      //     console.error('Error encrypting text:', error.message);
-      //     console.error('Encryption failed');
-      //   }
+      //   encryptedText = await encryptMessage(text, publicKey);
       // }
 
       const messageData = {
         _id,
         createdAt: new Date(),
-        text: fileURL ? '' : text,
+        text: fileURL ? '' : encryptedText,
         user: {
           _id: sender._id,
           name: sender._id === auth.currentUser.uid ? username : user.username,

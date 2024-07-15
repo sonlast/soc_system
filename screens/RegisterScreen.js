@@ -11,7 +11,8 @@ import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import QuickCrypto from 'react-native-quick-crypto';
+// import QuickCrypto from 'react-native-quick-crypto';
+import RSA from 'react-native-rsa-native';
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
@@ -51,22 +52,30 @@ const RegisterScreen = () => {
     return errors;
   };
 
+  // const generateKeyPair = async () => {
+  //   const { publicKey, privateKey } = QuickCrypto.generateKeyPairSync('rsa', {
+  //     modulusLength: 2048,
+  //     publicKeyEncoding: {
+  //       type: 'spki',
+  //       format: 'pem',
+  //     },
+  //     privateKeyEncoding: {
+  //       type: 'pkcs8',
+  //       format: 'pem',
+  //     },
+  //   });
+
+  //   await AsyncStorage.setItem('privateKey', privateKey);
+  //   return publicKey;
+  // };
+
   const generateKeyPair = async () => {
-    const { publicKey, privateKey } = QuickCrypto.generateKeyPairSync('rsa', {
-      modulusLength: 2048,
-      publicKeyEncoding: {
-        type: 'spki',
-        format: 'pem',
-      },
-      privateKeyEncoding: {
-        type: 'pkcs8',
-        format: 'pem',
-      },
-    });
+    const keys = await RSA.generateKeys(2048);
+    const { public: publicKey, private: privateKey } = keys;
 
     await AsyncStorage.setItem('privateKey', privateKey);
     return publicKey;
-  };
+  }
 
   const pressSignup = async () => {
     const formattedUsername = username.trim().charAt(0).toUpperCase() + username.slice(1);
