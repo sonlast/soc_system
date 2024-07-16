@@ -73,6 +73,8 @@ const ChatScreen = () => {
 
   const encryptMessage = async (message, publicKey) => {
     try {
+      console.log('Text to encrypt:', message);
+      console.log('Public key:', publicKey);
       const encryptedMessage = await RSA.encrypt(message, publicKey);
       console.log('Encrypted text:', encryptedMessage);
       return encryptedMessage;
@@ -84,6 +86,16 @@ const ChatScreen = () => {
 
   const decryptMessage = async (encryptedMessage, privateKey) => {
     try {
+      console.log('Encrypted text:', encryptedMessage);
+      console.log('Private key:', privateKey);
+
+      try {
+        atob(encryptedMessage);
+        console.log('Encrypted message is a valid base64 string');
+      } catch (error) {
+        throw new Error('Encrypted message is not a valid base64 string');
+      }
+
       const decryptedMessage = await RSA.decrypt(encryptedMessage, privateKey);
       console.log('Decrypted text:', decryptedMessage);
       return decryptedMessage;

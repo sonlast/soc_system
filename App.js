@@ -95,7 +95,6 @@ export default function App() {
 //! - implement RSA / TwoFish Encryption
 //TODO: - encrypt/decrypt messages
 //TODO: - encrypt/decrypt recent message in chat
-//TODO: - modify calls tab ui (filtering)
 //TODO: - group chat 
 //TODO: - voice message
 //TODO: - video message

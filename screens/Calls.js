@@ -131,7 +131,7 @@ const Calls = () => {
           alignItems: 'center',
           margin: 50,
         }}>
-          <SearchBar
+          {/* <SearchBar
             round
             searchIcon={{ size: 24 }}
             placeholder="Search"
@@ -146,7 +146,7 @@ const Calls = () => {
               fontFamily: 'TitilliumWeb_400Regular',
             }}
             underlineColorAndroid={'transparent'}
-          />
+          /> */}
         </View>
         {filteredUsers.length === 0 ? (
           <View style={{
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 10,
     paddingBottom: 0,
     paddingLeft: 10,
     padding: 10,

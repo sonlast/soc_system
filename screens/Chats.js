@@ -73,6 +73,7 @@ const Chats = () => {
   const fetchPrivateKey = async () => {
     try {
       const privateKey = await SecureStore.getItemAsync('privateKey');
+      console.log('privateKey: ', privateKey);
       return privateKey;
     } catch (error) {
       console.error('Error fetching private key: ', error);
@@ -303,7 +304,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 15,
+    paddingTop: 10,
     paddingBottom: 0,
     paddingLeft: 10,
     padding: 10,
