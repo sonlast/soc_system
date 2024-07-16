@@ -9,6 +9,8 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit, orderBy } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 import { SearchBar } from '@rneui/themed';
+import RSA from 'react-native-rsa-native';
+import * as SecureStore from 'expo-secure-store';
 
 const Item = ({ user, auth, onPress }) => (
   <Pressable onPress={() => onPress(user)}>
@@ -37,7 +39,9 @@ const Item = ({ user, auth, onPress }) => (
             textAlignVertical: 'center',
             color: '#777',
           }}>
-            {user.recentMessage || 'No messages yet'}
+            {user.recentMessage
+              ? (user.isSentByCurrentUser ? 'You: ' : `${user.username}: `) + user.recentMessage 
+              : 'No messages yet'}
           </Text>
         </View>
       </View>
@@ -66,8 +70,30 @@ const Chats = () => {
   //   }
   // };
 
+  const fetchPrivateKey = async () => {
+    try {
+      const privateKey = await SecureStore.getItemAsync('privateKey');
+      return privateKey;
+    } catch (error) {
+      console.error('Error fetching private key: ', error);
+      return null;
+    }
+  }
+
+  const decryptMessage = async (encryptedMessage, privateKey) => {
+    try {
+      const decryptedMessage = await RSA.decrypt(encryptedMessage, privateKey);
+      return decryptedMessage;
+    } catch (error) {
+      console.error('Error decrypting message: ', error);
+      return null;
+    }
+  }
+
   const fetchUsersWithRecentMessages = async () => {
     try {
+      const privateKey = await fetchPrivateKey();
+
       const usersCollection = collection(firestore, 'users');
       const userSnapshot = await getDocs(usersCollection);
       const userList = await Promise.all(
@@ -85,10 +111,16 @@ const Chats = () => {
             ? recentMessageSnapshot.docs[0].data()
             : { text: '', sender: '' };
 
+          let decryptedMessage = '';
+          if (recentMessageData.text) {
+            decryptedMessage = await decryptMessage(recentMessageData.text, privateKey);
+          }
+
           return {
             id: doc.id,
             ...userData,
-            recentMessage: recentMessageData.text,
+            recentMessage: decryptedMessage,
+            isSentByCurrentUser: recentMessageData.sender === auth.currentUser.uid, 
           };
         })
       );
