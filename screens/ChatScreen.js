@@ -13,7 +13,7 @@ import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import * as SecureStore from 'expo-secure-store';
-import 'react-native-get-random-values';
+// import 'react-native-get-random-values';
 // import crypto from 'react-native-quick-crypto'; //! UNUSED DUE TO COMMENTED IMPLEMENTATION
 // import RSA from 'react-native-rsa-native';
 import { RSA } from 'react-native-rsa-native';
@@ -169,15 +169,21 @@ const ChatScreen = () => {
           let decryptedText = '';
           if (data.text) {
             try {
-              decryptedText = await decryptMessage(data.text, privateKey);
+              if (data.user._id !== auth.currentUser.uid) {
+                decryptedText = await decryptMessage(data.text, privateKey);
+                console.log('Decrypted text:', decryptedText);
+                console.log('Decryption successful');
+              } else {
+                decryptedText = Buffer.from(data._sender, 'base64').toString('utf8');
+              }
             } catch (error) {
               console.error('Error decrypting text:', error.message);
             }
-          } 
+          }
 
           return {
             _id: doc.id,
-            text: decryptedText || data.text,
+            text: decryptedText,
             // text: data.text,
             createdAt: data.createdAt.toDate(),
             user: {
@@ -271,6 +277,7 @@ const ChatScreen = () => {
         participants: participantIds,
         file: fileURL || null,
         fileType: fileType || null,
+        _sender: Buffer.from(text, 'utf8').toString('base64'),
       };
 
       await addDoc(collection(firestore, 'chats'), messageData);

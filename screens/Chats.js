@@ -9,8 +9,9 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit, orderBy } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 import { SearchBar } from '@rneui/themed';
-import RSA from 'react-native-rsa-native';
-import * as SecureStore from 'expo-secure-store';
+// import RSA from 'react-native-rsa-native';
+// import * as SecureStore from 'expo-secure-store';
+global.Buffer = require('buffer').Buffer;
 
 const Item = ({ user, auth, onPress }) => (
   <Pressable onPress={() => onPress(user)}>
@@ -40,7 +41,7 @@ const Item = ({ user, auth, onPress }) => (
             color: '#777',
           }}>
             {user.recentMessage
-              ? (user.isSentByCurrentUser ? 'You: ' : `${user.username}: `) + user.recentMessage 
+              ? (user.isSentByCurrentUser ? 'You: ' : '') + user.recentMessage 
               : 'No messages yet'}
           </Text>
         </View>
@@ -70,30 +71,8 @@ const Chats = () => {
   //   }
   // };
 
-  const fetchPrivateKey = async () => {
-    try {
-      const privateKey = await SecureStore.getItemAsync('privateKey');
-      console.log('privateKey: ', privateKey);
-      return privateKey;
-    } catch (error) {
-      console.error('Error fetching private key: ', error);
-      return null;
-    }
-  }
-
-  const decryptMessage = async (encryptedMessage, privateKey) => {
-    try {
-      const decryptedMessage = await RSA.decrypt(encryptedMessage, privateKey);
-      return decryptedMessage;
-    } catch (error) {
-      console.error('Error decrypting message: ', error);
-      return null;
-    }
-  }
-
   const fetchUsersWithRecentMessages = async () => {
     try {
-      const privateKey = await fetchPrivateKey();
 
       const usersCollection = collection(firestore, 'users');
       const userSnapshot = await getDocs(usersCollection);
@@ -110,11 +89,12 @@ const Chats = () => {
           const recentMessageSnapshot = await getDocs(recentMessageQuery);
           const recentMessageData = recentMessageSnapshot.docs.length
             ? recentMessageSnapshot.docs[0].data()
-            : { text: '', sender: '' };
+            : { _sender: '', sender: '' };
 
           let decryptedMessage = '';
-          if (recentMessageData.text) {
-            decryptedMessage = await decryptMessage(recentMessageData.text, privateKey);
+          if (recentMessageData._sender) {
+            // decryptedMessage = await decryptMessage(recentMessageData._sender, privateKey);
+            decryptedMessage = Buffer.from(recentMessageData._sender, 'base64').toString('utf-8');
           }
 
           return {
