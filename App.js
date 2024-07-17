@@ -72,10 +72,10 @@ export default function App() {
       //* PIN (3 DAY/S)
       //* Fingerprint (3 DAY/S)
       //* Video Call
-      //* Audio Call
+      //? Audio Call
 //* Other Security Features
       //* RSA Encryption
-      //TODO: Twofish Encryption
+      //TODO: Twofish Encryption 
 //TODO: Modify Algorithm
 
 //! --------------------------------- THESIS FEATURES
@@ -86,6 +86,7 @@ export default function App() {
 //TODO: Group chats
 //? Voice Message
 //? Video Message
+//? Audio Call
 //? Picture
 //* Data Encryption
 //TODO: Multimedia
