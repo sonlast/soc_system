@@ -13,10 +13,9 @@ import * as ScreenCapture from 'expo-screen-capture';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import * as SecureStore from 'expo-secure-store';
-// import 'react-native-get-random-values';
 // import crypto from 'react-native-quick-crypto'; //! UNUSED DUE TO COMMENTED IMPLEMENTATION
-// import RSA from 'react-native-rsa-native';
 import { RSA } from 'react-native-rsa-native';
+import CryptoJS from 'react-native-crypto-js';
 global.Buffer = require('buffer').Buffer;
 
 const ChatScreen = () => {
@@ -167,10 +166,16 @@ const ChatScreen = () => {
           // }
 
           let decryptedText = '';
-          if (data.text) {
+          if (data.text && data.aesKey) {
             try {
               if (data.user._id !== auth.currentUser.uid) {
-                decryptedText = await decryptMessage(data.text, privateKey);
+                const decryptedAesKeyBase64 = await RSA.decrypt(data.aesKey, privateKey);
+                console.log('Decrypted AES key:', decryptedAesKeyBase64);
+                const decryptedAesKey = Buffer.from(decryptedAesKeyBase64, 'base64').toString('hex');
+                console.log('Decrypted AES key buffer:', decryptedAesKey);
+                const decryptedTextBytes = CryptoJS.AES.decrypt(data.text, decryptedAesKey);
+                console.log('Decrypted text bytes:', decryptedTextBytes);
+                decryptedText = decryptedTextBytes.toString(CryptoJS.enc.Utf8);
                 console.log('Decrypted text:', decryptedText);
                 console.log('Decryption successful');
               } else {
@@ -258,17 +263,26 @@ const ChatScreen = () => {
       //     console.error('Error encrypting text:', error.message);
       //     console.error('Encryption failed');
       //   }
-      // }
+      // };
+      const aesKey = CryptoJS.lib.WordArray.random(16).toString();
+      console.log('AES key:', aesKey);
 
       let encryptedText = '';
       if (text) {
-        encryptedText = await encryptMessage(text, publicKey);
+        encryptedText = CryptoJS.AES.encrypt(text, aesKey).toString();
+        console.log('Encrypted text:', encryptedText);
       }
+
+      const aeseKeyBuffer = Buffer.from(aesKey, 'hex');
+      console.log('AES key buffer:', aeseKeyBuffer);
+      const encryptedAesKey = await RSA.encrypt(aeseKeyBuffer.toString('base64'), publicKey);
+      console.log('Encrypted AES key:', encryptedAesKey);
 
       const messageData = {
         _id,
         createdAt: new Date(),
         text: fileURL ? '' : encryptedText,
+        aesKey: encryptedAesKey,
         user: {
           _id: sender._id,
           name: sender._id === auth.currentUser.uid ? username : user.username,
