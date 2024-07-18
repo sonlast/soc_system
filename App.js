@@ -13,6 +13,7 @@ import SearchChat from './screens/SearchChat';
 import ChatScreen from './screens/ChatScreen';
 import VideoCall from './screens/VideoCallScreen';
 import AudioCall from './screens/AudioCallScreen';
+import GroupChat from './screens/CreateGroupChatScreen';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -53,6 +54,7 @@ export default function App() {
         <Stack.Screen name="PinandFingerprint" component={PinandFingerPrint} options={{ headerShown: false }} />
         <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true }}/>
+        <Stack.Screen name="GroupChat" component={GroupChat} options={{ title: 'Group Chat' }}/>
         <Stack.Screen name="SearchChat" component={SearchChat} options={{ title: 'Search Contacts' }}/>
         <Stack.Screen name="VideoCall" component={VideoCall} options={{ title: 'Video Call' }}/>
         <Stack.Screen name="AudioCall" component={AudioCall} options={{ title: 'Audio Call' }}/>
@@ -64,23 +66,23 @@ export default function App() {
 //? SAFE-on-Chat: A Messaging Application with Security Features using RSA and TwoFish Encryption Algorithm
 
 //! ------------------------------ ADDITIONAL FEATURES
-//* Sending Attachments (other file types) (2 DAY/S)
-//* No SQL (1 DAY/S)
-//* Login / Registration Form (2 DAY/S)
-//* Chatroom (1 DAY/S)
+//* Sending Attachments (other file types)
+//* No SQL
+//* Login / Registration Form
+//* Chatroom
 //* Can't Screenshot
-      //* PIN (3 DAY/S)
-      //* Fingerprint (3 DAY/S)
+      //* PIN
+      //* Fingerprint
       //* Video Call
       //? Audio Call
 //* Other Security Features
       //* RSA Encryption
       //TODO: Twofish Encryption 
-//TODO: Modify Algorithm
+//* Modify Algorithm
 
 //! --------------------------------- THESIS FEATURES
-//* Real-time chat (3 DAY/S)
-//* File send (2 DAY/S)
+//* Real-time chat
+//* File send
       //* Images
       //* Document (different file types)
 //TODO: Group chats
@@ -93,16 +95,14 @@ export default function App() {
       //TODO: Audio
 
 //! TASKS for Tomorrow
-//! - implement RSA / TwoFish Encryption
-//TODO: - encrypt/decrypt recent message in chat
 //TODO: - group chat 
-//TODO: - voice message
-//TODO: - video message
+//? - voice message
+//? - video message
+//? - calls list (only the current user)
 
 //? - navigation handling
 //? - configure pin for global storage
 
 //! --------------- UNUSED SCREENS / COMPONENTS --------------- //
-// - SearchChat.js (Screen)
 // - SettingsScreen.js (Screen)
 // - Header.js (Component)

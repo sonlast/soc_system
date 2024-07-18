@@ -257,8 +257,8 @@ const Chats = () => {
                   tintColor={'#f0ceff'}
                   titleColor={'#f0ceff'}
                   title={'Loading...'}
-                  colors={['#f0ceff']}
-                  progressBackgroundColor={'#4c669f'}
+                  colors={['#4c669f']}
+                  progressBackgroundColor={'#f0ceff'}
                   progressViewOffset={20}
                 />
               }

@@ -74,7 +74,7 @@ const ChatScreen = () => {
   //   try {
   //     console.log('Text to encrypt:', message);
   //     console.log('Public key:', publicKey);
-  //     const encryptedMessage = await RSA.encrypt(message, publicKey);
+      // const encryptedMessage = await RSA.encrypt(message, publicKey);
   //     console.log('Encrypted text:', encryptedMessage);
   //     return encryptedMessage;
   //   } catch (error) {

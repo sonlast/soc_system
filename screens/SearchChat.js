@@ -1,36 +1,38 @@
 import React, { useEffect, useState } from 'react'
-import { BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { BackHandler, FlatList, Image, TouchableOpacity, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SearchBar } from '@rneui/themed';
-import { Avatar } from 'react-native-elements';
+import { Divider, Avatar } from 'react-native-elements';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 
 const Item = ({ user, onPress }) => (
   <Pressable onPress={() => onPress(user)}>
-  <View style={styles.item}>
-    <View style={{
-      flexDirection: 'row',
-      paddingVertical: 2.5,
-      paddingHorizontal: 5,
-    }}>
-      <View>
-        <Avatar size={48} rounded source={user.profilePicture ? { uri: user.profilePicture } : require('../assets/profilepic.jpg')} />
-      </View>
-      <View>
-        <Text style={{
-          fontFamily: 'TitilliumWeb_400Regular',
-          fontSize: 20,
-          paddingLeft: 10,
-          paddingVertical: 10,
-          textAlignVertical: 'center', 
-        }}>{user.username}</Text>
+    <View style={styles.item}>
+      <View style={{
+        flexDirection: 'row',
+        paddingVertical: 2.5,
+        paddingHorizontal: 5,
+      }}>
+        <View>
+          <Avatar size={48} rounded source={user.profilePicture ? { uri: user.profilePicture } : require('../assets/profilepic.jpg')} />
+        </View>
+        <View>
+          <Text style={{
+            fontFamily: 'TitilliumWeb_400Regular',
+            fontSize: 20,
+            paddingLeft: 10,
+            paddingVertical: 10,
+            textAlignVertical: 'center',
+          }}>{user.username}</Text>
+        </View>
       </View>
     </View>
-  </View>
   </Pressable>
 );
 
@@ -98,8 +100,8 @@ const SearchChat = () => {
   const handleUserPress = (user) => {
     if (user.uid) {
 
-      navigation.navigate('ChatScreen', {user, username: user.username, profilePicture: user.profilePicture, uid: user.uid});
-    } else { 
+      navigation.navigate('ChatScreen', { user, username: user.username, profilePicture: user.profilePicture, uid: user.uid });
+    } else {
       console.error('User does not have a valid UID');
     }
   };
@@ -144,6 +146,69 @@ const SearchChat = () => {
               underlineColorAndroid={'transparent'}
             />
           </View>
+          <View>
+            <Pressable
+              onPress={() =>
+                navigation.navigate('GroupChat')
+              }
+              style={({ pressed }) => [
+                {
+                  backgroundColor: pressed
+                    ? '#4c669f'
+                    : 'white',
+                  borderColor: pressed
+                    ? 'white'
+                    : '#4c669f',
+                  borderWidth: 1,
+                },
+                {
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                  marginVertical: 10,
+                  marginHorizontal: 10,
+                  borderRadius: 10,
+                }
+              ]}
+            >
+              {({ pressed }) => (
+                <View style={{
+                  flexDirection: 'row',
+                  paddingVertical: 2.5,
+                  paddingHorizontal: 5,
+                }}>
+                  <View
+                    style={{
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      paddingVertical: 2.5,
+                      paddingHorizontal: 5,
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faUserGroup} size={30} color={pressed ? 'white' : '#4c669f'} />
+                  </View>
+                  <View>
+                    <Text style={{
+                      fontFamily: 'TitilliumWeb_400Regular',
+                      fontSize: 20,
+                      paddingLeft: 10,
+                      paddingVertical: 10,
+                      textAlignVertical: 'center',
+                      color: pressed
+                        ? '#fff'
+                        : '#4c669f',
+                    }}>Create Group</Text>
+                  </View>
+                </View>
+              )}
+            </Pressable>
+          </View>
+          <Divider
+            style={{
+              backgroundColor: "#f0ceff",
+              marginVertical: 5,
+              width: '100%',
+              height: 2,
+            }} />
           {filteredUsers.length === 0 ? (
             <View style={{
               flex: 1,
@@ -155,7 +220,7 @@ const SearchChat = () => {
             <FlatList
               showsVerticalScrollIndicator={false}
               data={filteredUsers}
-              renderItem={({ item }) => <Item user={item} onPress={handleUserPress}/>}
+              renderItem={({ item }) => <Item user={item} onPress={handleUserPress} />}
               keyExtractor={item => item.id}
               style={{ marginTop: 10, paddingBottom: 10 }}
             />
