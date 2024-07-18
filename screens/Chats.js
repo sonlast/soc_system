@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { BackHandler, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { BackHandler, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -9,6 +9,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit, orderBy } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 import { SearchBar } from '@rneui/themed';
+import { ScrollView } from 'react-native-gesture-handler';
 // import RSA from 'react-native-rsa-native';
 // import * as SecureStore from 'expo-secure-store';
 global.Buffer = require('buffer').Buffer;
@@ -41,7 +42,7 @@ const Item = ({ user, auth, onPress }) => (
             color: '#777',
           }}>
             {user.recentMessage
-              ? (user.isSentByCurrentUser ? 'You: ' : '') + user.recentMessage 
+              ? (user.isSentByCurrentUser ? 'You: ' : '') + user.recentMessage
               : 'No messages yet'}
           </Text>
         </View>
@@ -58,6 +59,7 @@ const Chats = () => {
   const [users, setUsers] = useState([]);
   const [lastClickedUser, setLastClickedUser] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   // const fetchUsers = async () => {
   //   try {
@@ -70,6 +72,13 @@ const Chats = () => {
   //     console.error('Error fetching users: ', error);
   //   }
   // };
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   const fetchUsersWithRecentMessages = async () => {
     try {
@@ -101,7 +110,7 @@ const Chats = () => {
             id: doc.id,
             ...userData,
             recentMessage: decryptedMessage,
-            isSentByCurrentUser: recentMessageData.sender === auth.currentUser.uid, 
+            isSentByCurrentUser: recentMessageData.sender === auth.currentUser.uid,
           };
         })
       );
@@ -240,13 +249,25 @@ const Chats = () => {
             <Text style={styles.temp_text}>Start a New Chat. </Text>
           </View>
         ) : (
-          <FlatList
-            showsVerticalScrollIndicator={false}
-            data={sortedUsers}
-            renderItem={({ item }) => <Item user={item} onPress={handleUserPress} />}
-            keyExtractor={item => item.id}
-            style={{ marginTop: 10, paddingBottom: 10 }}
-          />
+            <FlatList
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={'#f0ceff'}
+                  titleColor={'#f0ceff'}
+                  title={'Loading...'}
+                  colors={['#f0ceff']}
+                  progressBackgroundColor={'#4c669f'}
+                  progressViewOffset={20}
+                />
+              }
+              showsVerticalScrollIndicator={false}
+              data={sortedUsers}
+              renderItem={({ item }) => <Item user={item} onPress={handleUserPress} />}
+              keyExtractor={item => item.id}
+              style={{ marginTop: 10, paddingBottom: 10 }}
+            />
         )}
         <View
           style={{

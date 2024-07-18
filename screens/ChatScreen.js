@@ -70,39 +70,39 @@ const ChatScreen = () => {
     fetchKeys();
   }, []);
 
-  const encryptMessage = async (message, publicKey) => {
-    try {
-      console.log('Text to encrypt:', message);
-      console.log('Public key:', publicKey);
-      const encryptedMessage = await RSA.encrypt(message, publicKey);
-      console.log('Encrypted text:', encryptedMessage);
-      return encryptedMessage;
-    } catch (error) {
-      console.error('Error encrypting text:', error.message);
-      throw error;
-    }
-  };
+  // const encryptMessage = async (message, publicKey) => {
+  //   try {
+  //     console.log('Text to encrypt:', message);
+  //     console.log('Public key:', publicKey);
+  //     const encryptedMessage = await RSA.encrypt(message, publicKey);
+  //     console.log('Encrypted text:', encryptedMessage);
+  //     return encryptedMessage;
+  //   } catch (error) {
+  //     console.error('Error encrypting text:', error.message);
+  //     throw error;
+  //   }
+  // };
 
-  const decryptMessage = async (encryptedMessage, privateKey) => {
-    try {
-      console.log('Encrypted text:', encryptedMessage);
-      console.log('Private key:', privateKey);
+  // const decryptMessage = async (encryptedMessage, privateKey) => {
+  //   try {
+  //     console.log('Encrypted text:', encryptedMessage);
+  //     console.log('Private key:', privateKey);
 
-      try {
-        atob(encryptedMessage);
-        console.log('Encrypted message is a valid base64 string');
-      } catch (error) {
-        throw new Error('Encrypted message is not a valid base64 string');
-      }
+  //     try {
+  //       atob(encryptedMessage);
+  //       console.log('Encrypted message is a valid base64 string');
+  //     } catch (error) {
+  //       throw new Error('Encrypted message is not a valid base64 string');
+  //     }
 
-      const decryptedMessage = await RSA.decrypt(encryptedMessage, privateKey);
-      console.log('Decrypted text:', decryptedMessage);
-      return decryptedMessage;
-    } catch (error) {
-      console.error('Error decrypting text:', error.message);
-      throw error;
-    }
-  };
+  //     const decryptedMessage = await RSA.decrypt(encryptedMessage, privateKey);
+  //     console.log('Decrypted text:', decryptedMessage);
+  //     return decryptedMessage;
+  //   } catch (error) {
+  //     console.error('Error decrypting text:', error.message);
+  //     throw error;
+  //   }
+  // };
 
   useEffect(() => {
     const activateScreenCapture = async () => {
@@ -167,7 +167,7 @@ const ChatScreen = () => {
 
           let decryptedText = '';
           if (data.text && data.aesKey) {
-            try {
+            // try {
               if (data.user._id !== auth.currentUser.uid) {
                 const decryptedAesKeyBase64 = await RSA.decrypt(data.aesKey, privateKey);
                 console.log('Decrypted AES key:', decryptedAesKeyBase64);
@@ -181,9 +181,9 @@ const ChatScreen = () => {
               } else {
                 decryptedText = Buffer.from(data._sender, 'base64').toString('utf8');
               }
-            } catch (error) {
-              console.error('Error decrypting text:', error.message);
-            }
+            // } catch (error) {
+            //   console.error('Error decrypting text:', error.message);
+            // }
           }
 
           return {
