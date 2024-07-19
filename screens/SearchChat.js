@@ -12,8 +12,28 @@ import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firesto
 import { app } from '../firebaseConfig';
 
 const Item = ({ user, onPress }) => (
-  <Pressable onPress={() => onPress(user)}>
-    <View style={styles.item}>
+  <Pressable
+    onPress={() => onPress(user)}
+    style={({ pressed }) => [
+      {
+        backgroundColor: pressed
+          ? '#4c669f'
+          : '#f0ceff',
+        borderColor: pressed
+          ? '#f0ceff'
+          : '#4c669f',
+        borderWidth: 1,
+      },
+      {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        marginVertical: 10,
+        marginHorizontal: 10,
+        borderRadius: 10,
+      }
+    ]}
+  >
+    {({ pressed }) => (
       <View style={{
         flexDirection: 'row',
         paddingVertical: 2.5,
@@ -29,10 +49,13 @@ const Item = ({ user, onPress }) => (
             paddingLeft: 10,
             paddingVertical: 10,
             textAlignVertical: 'center',
+            color: pressed
+              ? '#fff'
+              : '#000',
           }}>{user.username}</Text>
         </View>
       </View>
-    </View>
+    )}
   </Pressable>
 );
 
@@ -132,7 +155,7 @@ const SearchChat = () => {
             <SearchBar
               round
               searchIcon={{ size: 24 }}
-              placeholder="Search"
+              placeholder=" Search"
               onChangeText={(text) => setUserInput(text)}
               value={userInput}
               containerStyle={{
@@ -141,15 +164,17 @@ const SearchChat = () => {
                 borderTopWidth: 0,
               }}
               inputStyle={{
+                color: '#fff',
                 fontFamily: 'TitilliumWeb_400Regular',
               }}
               underlineColorAndroid={'transparent'}
+              cursorColor={'#fff'}
             />
           </View>
           <View>
             <Pressable
               onPress={() =>
-                navigation.navigate('GroupChat')
+                navigation.navigate('CreateGroupChat')
               }
               style={({ pressed }) => [
                 {
@@ -264,15 +289,6 @@ const styles = StyleSheet.create({
     fontSize: 25,
     color: '#fff',
     textAlign: 'center',
-  },
-  item: {
-    flexDirection: 'row',
-    backgroundColor: '#f9c2ff',
-    paddingLeft: 10,
-    padding: 10,
-    marginVertical: 10,
-    marginHorizontal: 10,
-    borderRadius: 10,
   },
   title: {
     fontSize: 20,

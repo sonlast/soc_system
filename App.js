@@ -13,7 +13,8 @@ import SearchChat from './screens/SearchChat';
 import ChatScreen from './screens/ChatScreen';
 import VideoCall from './screens/VideoCallScreen';
 import AudioCall from './screens/AudioCallScreen';
-import GroupChat from './screens/CreateGroupChatScreen';
+import CreateGroupChat from './screens/CreateGroupChatScreen';
+import GroupChatScreen from './screens/GroupChatScreen';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,7 +55,8 @@ export default function App() {
         <Stack.Screen name="PinandFingerprint" component={PinandFingerPrint} options={{ headerShown: false }} />
         <Stack.Screen name="SignUpAuth" component={SignUpAuth} options={{ headerShown: false }} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true }}/>
-        <Stack.Screen name="GroupChat" component={GroupChat} options={{ title: 'Group Chat' }}/>
+        <Stack.Screen name="CreateGroupChat" component={CreateGroupChat} options={{ title: 'Create Group' }}/>
+        <Stack.Screen name="GroupChatScreen" component={GroupChatScreen} options={{ headerShown: true }}/>
         <Stack.Screen name="SearchChat" component={SearchChat} options={{ title: 'Search Contacts' }}/>
         <Stack.Screen name="VideoCall" component={VideoCall} options={{ title: 'Video Call' }}/>
         <Stack.Screen name="AudioCall" component={AudioCall} options={{ title: 'Audio Call' }}/>

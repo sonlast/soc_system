@@ -226,7 +226,7 @@ const Chats = () => {
           <SearchBar
             round
             searchIcon={{ size: 24 }}
-            placeholder="Search"
+            placeholder=" Search"
             onChangeText={(text) => setUserInput(text)}
             value={userInput}
             containerStyle={{
@@ -235,9 +235,11 @@ const Chats = () => {
               borderTopWidth: 0,
             }}
             inputStyle={{
+              color: '#fff',
               fontFamily: 'TitilliumWeb_400Regular',
             }}
             underlineColorAndroid={'transparent'}
+            cursorColor={'#fff'}
           />
         </View>
         {filteredUsers.length === 0 ? (
