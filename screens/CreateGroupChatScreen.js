@@ -71,7 +71,7 @@ const CreateGroupScreen = ({ navigation }) => {
         participants: selectedUsers,
         createdAt: new Date(),
       });
-      navigation.navigate('GroupChatScreen', { groupId: groupDocRef.id, groupName}); // Navigate to the chat screen or group chat list
+      navigation.navigate('GroupChats', { groupId: groupDocRef.id, groupName}); // Navigate to the chat screen or group chat list
     } catch (error) {
       console.error('Error creating group:', error);
     }

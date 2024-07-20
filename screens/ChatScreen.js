@@ -16,7 +16,11 @@ import * as SecureStore from 'expo-secure-store';
 // import crypto from 'react-native-quick-crypto'; //! UNUSED DUE TO COMMENTED IMPLEMENTATION
 import { RSA } from 'react-native-rsa-native';
 import CryptoJS from 'react-native-crypto-js';
+import { LogBox } from 'react-native';
 global.Buffer = require('buffer').Buffer;
+
+LogBox.ignoreLogs(['Warning...']);
+LogBox.ignoreAllLogs();
 
 const ChatScreen = () => {
   const navigation = useNavigation();

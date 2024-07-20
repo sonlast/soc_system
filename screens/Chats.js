@@ -3,7 +3,7 @@ import { BackHandler, FlatList, Image, Pressable, RefreshControl, StyleSheet, Te
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import { Avatar } from 'react-native-elements';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit, orderBy } from 'firebase/firestore';
@@ -242,6 +242,62 @@ const Chats = () => {
             cursorColor={'#fff'}
           />
         </View>
+        <View>
+          <Pressable
+            onPress={() =>
+              navigation.navigate('GroupChats')
+            }
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed
+                  ? '#4c669f'
+                  : 'white',
+                borderColor: pressed
+                  ? 'white'
+                  : '#4c669f',
+                borderWidth: 1,
+              },
+              {
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                marginVertical: 10,
+                marginHorizontal: 10,
+                borderRadius: 10,
+              }
+            ]}
+          >
+            {({ pressed }) => (
+              <View style={{
+                flexDirection: 'row',
+                paddingVertical: 2.5,
+                paddingHorizontal: 5,
+              }}>
+                <View
+                  style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingVertical: 2.5,
+                    paddingHorizontal: 5,
+                  }}
+                >
+                  <FontAwesomeIcon icon={faUserGroup} size={30} color={pressed ? 'white' : '#4c669f'} />
+                </View>
+                <View>
+                  <Text style={{
+                    fontFamily: 'TitilliumWeb_400Regular',
+                    fontSize: 20,
+                    paddingLeft: 10,
+                    paddingVertical: 10,
+                    textAlignVertical: 'center',
+                    color: pressed
+                      ? '#fff'
+                      : '#4c669f',
+                  }}>Group Chats</Text>
+                </View>
+              </View>
+            )}
+          </Pressable>
+        </View>
         {filteredUsers.length === 0 ? (
           <View style={{
             flex: 1,
@@ -251,25 +307,25 @@ const Chats = () => {
             <Text style={styles.temp_text}>Start a New Chat. </Text>
           </View>
         ) : (
-            <FlatList
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  tintColor={'#f0ceff'}
-                  titleColor={'#f0ceff'}
-                  title={'Loading...'}
-                  colors={['#4c669f']}
-                  progressBackgroundColor={'#f0ceff'}
-                  progressViewOffset={20}
-                />
-              }
-              showsVerticalScrollIndicator={false}
-              data={sortedUsers}
-              renderItem={({ item }) => <Item user={item} onPress={handleUserPress} />}
-              keyExtractor={item => item.id}
-              style={{ marginTop: 10, paddingBottom: 10 }}
-            />
+          <FlatList
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={'#f0ceff'}
+                titleColor={'#f0ceff'}
+                title={'Loading...'}
+                colors={['#4c669f']}
+                progressBackgroundColor={'#f0ceff'}
+                progressViewOffset={20}
+              />
+            }
+            showsVerticalScrollIndicator={false}
+            data={sortedUsers}
+            renderItem={({ item }) => <Item user={item} onPress={handleUserPress} />}
+            keyExtractor={item => item.id}
+            style={{ marginTop: 10, paddingBottom: 10 }}
+          />
         )}
         <View
           style={{

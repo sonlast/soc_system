@@ -131,6 +131,7 @@ const VideoCallScreen = ({ route, navigation }) => {
         username: user.username,
         profilePicture: user.profilePicture,
         timestamp: new Date(),
+        uid: user.uid,
       };
       await addDoc(collection(firestore, 'calls'), callDetails);
     } catch (error) {

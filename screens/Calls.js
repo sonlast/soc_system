@@ -44,8 +44,10 @@ const Calls = () => {
       const callsCollection = collection(firestore, 'calls');
       const callSnapshot = await getDocs(callsCollection);
       const callList = callSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setUsers(callList);
-      setFilteredUsers(callList);
+      const currentUserId = auth.currentUser.uid;
+      const userCalls = callList.filter(call => call.uid === currentUserId);
+      setUsers(userCalls);
+      setFilteredUsers(userCalls);
     } catch (error) {
       console.error('Error fetching calls: ', error);
     }
