@@ -1,21 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BackHandler, View, Text, TextInput, Pressable, FlatList, StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane, faPaperclip, faImage, faVideo, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, collection, query, where, orderBy, onSnapshot, addDoc, Timestamp } from 'firebase/firestore';
+import { getFirestore, doc, collection, query, where, orderBy, onSnapshot, addDoc, Timestamp, getDoc } from 'firebase/firestore';
 import { useFonts, TitilliumWeb_400Regular, TitilliumWeb_600SemiBold } from '@expo-google-fonts/titillium-web';
+import * as ScreenCapture from "expo-screen-capture";
 import { app } from '../firebaseConfig';
-import { Avatar } from 'react-native-elements';
+import { Avatar, Divider } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useIsFocused } from '@react-navigation/native';
 
 const GroupChatScreen = ({ route, navigation }) => {
+  const isFocused = useIsFocused();
   const { groupId, groupName, } = route.params; // Pass groupId and groupName through route params
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState('');
   const auth = getAuth(app);
   const firestore = getFirestore(app);
+  const flatlistRef = useRef(null);
 
+  useEffect(() => {
+    const activateScreenCapture = async () => {
+      await ScreenCapture.preventScreenCaptureAsync();
+    };
+    const deactivateScreenCapture = async () => {
+      await ScreenCapture.allowScreenCaptureAsync();
+    };
+
+    if (isFocused) {
+      activateScreenCapture();
+    } else {
+      deactivateScreenCapture();
+    }
+  }, [isFocused]);
+  
   const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -53,29 +72,54 @@ const GroupChatScreen = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    const messagesRef = collection(firestore, 'groups', groupId, 'messages');
-    const q = query(messagesRef, orderBy('createdAt', 'asc'));
+    const fetchMessagesWithUsernames = async () => {
+      const messagesRef = collection(firestore, 'groups', groupId, 'messages');
+      const q = query(messagesRef, orderBy('createdAt', 'asc'));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const messagesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMessages(messagesList);
-    });
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const messagesList = await Promise.all(snapshot.docs.map(async (msgDoc) => {
+          const messageData = msgDoc.data();
+          const userRef = doc(firestore, 'users', messageData.senderId);
+          const userSnap = await getDoc(userRef);
+          const username = userSnap.data().username;
+          return {
+            id: msgDoc.id,
+            ...messageData,
+            username: username,
+          }
+        }));
+        setMessages(messagesList);
+        flatlistRef.current?.scrollToEnd({ animated: true });
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    }
+    fetchMessagesWithUsernames();
   }, [groupId]);
 
   const sendMessage = async () => {
     if (!messageText.trim()) return;
 
     try {
+      const userRef = doc(firestore, 'users', auth.currentUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        console.error('User not found');
+        return;
+      }
+
+      const username = userSnap.data().username;
+
       const messagesRef = collection(firestore, 'groups', groupId, 'messages');
       await addDoc(messagesRef, {
         text: messageText,
         senderId: auth.currentUser.uid,
-        username: auth.currentUser.displayName,
+        username: username,
         createdAt: Timestamp.now(),
       });
       setMessageText('');
+      console.log('Message sent');
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -98,19 +142,40 @@ const GroupChatScreen = ({ route, navigation }) => {
         start={[0.5, 0.5]}
       >
         <FlatList
+          ref={flatlistRef}
           data={messages}
           renderItem={({ item }) => (
             <View style={[
               styles.messageContainer,
               item.senderId === auth.currentUser.uid ? styles.currentUserMessage : styles.otherUserMessage
             ]}>
-              <Text style={styles.messageText}>{item.text}</Text>
-              <Text style={styles.messageTime}>{new Date(item.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+              <Text style={{
+                fontSize: 16,
+                fontFamily: 'TitilliumWeb_400Regular',
+                alignSelf: item.senderId === auth.currentUser.uid ? 'flex-end' : 'flex-start',
+              }}>{item.text}</Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: 5,
+                }}
+              >
+                <Text style={styles.messageText}>{item.username}</Text>
+                <Divider 
+                  orientation="vertical" 
+                  width={1} 
+                  style={{ backgroundColor: 'grey', marginHorizontal: 3 }}
+                />
+                <Text style={styles.messageTime}>{new Date(item.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+              </View>
             </View>
           )}
           keyExtractor={item => item.id}
           style={styles.messagesList}
           showsVerticalScrollIndicator={false}
+          onContentSizeChange={() => flatlistRef.current?.scrollToEnd({ animated: true })}
         />
         <View style={styles.inputContainer}>
           <TextInput
@@ -146,11 +211,11 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginHorizontal: 10,
     padding: 10,
-    backgroundColor: '#f0f0f0',
     borderRadius: 20,
   },
   messageText: {
-    fontSize: 16,
+    color: '#666',
+    fontSize: 12.5,
     fontFamily: 'TitilliumWeb_400Regular',
   },
   messageTime: {

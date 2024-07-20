@@ -9,7 +9,6 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit, orderBy } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 import { SearchBar } from '@rneui/themed';
-import { ScrollView } from 'react-native-gesture-handler';
 // import RSA from 'react-native-rsa-native';
 // import * as SecureStore from 'expo-secure-store';
 global.Buffer = require('buffer').Buffer;
@@ -95,10 +94,13 @@ const Chats = () => {
             orderBy('createdAt', 'desc'),
             limit(1)
           );
+
           const recentMessageSnapshot = await getDocs(recentMessageQuery);
-          const recentMessageData = recentMessageSnapshot.docs.length
-            ? recentMessageSnapshot.docs[0].data()
-            : { _sender: '', sender: '' };
+          if (recentMessageSnapshot.docs.length === 0) {
+            return null;
+          }
+
+          const recentMessageData = recentMessageSnapshot.docs[0].data()
 
           let decryptedMessage = '';
           if (recentMessageData._sender) {
@@ -114,8 +116,9 @@ const Chats = () => {
           };
         })
       );
-      setUsers(userList);
-      setFilteredUsers(userList);
+      const filteredUserList = userList.filter(user => user != null);
+      setUsers(filteredUserList);
+      setFilteredUsers(filteredUserList);
     } catch (error) {
       console.error('Error fetching users with recent messages: ', error);
     }
