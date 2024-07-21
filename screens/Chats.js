@@ -72,7 +72,7 @@ const Chats = () => {
   //   }
   // };
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
       setRefreshing(false);

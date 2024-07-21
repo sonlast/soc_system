@@ -122,7 +122,6 @@ const SearchChat = () => {
 
   const handleUserPress = (user) => {
     if (user.uid) {
-
       navigation.navigate('ChatScreen', { user, username: user.username, profilePicture: user.profilePicture, uid: user.uid });
     } else {
       console.error('User does not have a valid UID');

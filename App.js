@@ -89,22 +89,44 @@ export default function App() {
 //* File send
       //* Images
       //* Document (different file types)
-//TODO: Group chats
+//* Group chats
 //? Voice Message
 //? Video Message
-//? Audio Call
+//* Audio Call
 //? Picture
 //* Data Encryption
 //TODO: Multimedia
       //TODO: Audio
 
 //! TASKS for Tomorrow
-//TODO: - group chat 
 //? - voice message
 //? - video message
-//? - navigation handling
 //? - configure pin for global storage
 
 //! --------------- UNUSED SCREENS / COMPONENTS --------------- //
 // - SettingsScreen.js (Screen)
 // - Header.js (Component)
+
+//* ------------------------------ FINAL FEATURES ------------------------------ //
+//* Login (Authentication)
+//* Registration (Authentication)
+//* PIN (Security)
+//* Fingerprint (Security)
+//* RSA/AES Encryption & Decryption (Security)
+//* Disable Screenshot & Screen Recording (Security)
+//* Chats List
+//* Calls List
+//* Group Chats List
+//* 1-on-1 Chat 
+//* Group Chats
+//* File Send (Images, Documents)
+//* Typing Indicator
+//* Video Call 
+//* Audio Call
+//* Expo Services
+    //* Development Build (Customized Expo Go)
+    //* Production Build (APK)
+//* Firebase Services 
+    //* Authentication (Login, Registration) 
+    //* Firestore (Database)
+    //* Storage (Files)
