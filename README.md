@@ -43,7 +43,7 @@
 
 [SIGN UP FOR AN EXPO DEV ACCOUNT HERE](http://expo.dev/)
 
-## TO RUN
+## USAGE
 After downloading this github repository, run the command below in the terminal of the folder's root directory. This command installs all the dependencies for the mobile application.
 
 ```
@@ -73,7 +73,7 @@ node server.js
 - Other recipient should also press __Start Call__ after the caller shows up in the recipient's call.
 - The caller should __press again the green button__ in order to start video calling.
 
-## TO BUILD APKs AND DEVELOPMENT BUILDS USING EAS
+## BUILD APKs AND DEVELOPMENT BUILDS USING EAS
 Create an expo dev account [here](http://expo.dev/).
 
 After creating an account, follow the instructions given in this [documentation](https://docs.expo.dev/build/setup/) for setting up eas.
