@@ -35,12 +35,16 @@
 
 
 ## PREREQUISITES BEFORE RUNNING 
-> Install the latest version of Node.js on the link below and follow the set up instructions.
+> Install the latest version of __Node.js__ on the link below and follow the set up instructions.
 
 [DOWNLOAD NODE.JS HERE](https://nodejs.org/en/download/prebuilt-binaries)
 
+> Have an Expo Dev account for building APK's and Development Builds.
+
+[SIGN UP FOR AN EXPO DEV ACCOUNT HERE](http://expo.dev/)
+
 ## TO RUN
-After downloading this github repository, run the command below in the terminal of the folder's root directory.
+After downloading this github repository, run the command below in the terminal of the folder's root directory. This command installs all the dependencies for the mobile application.
 
 ```
 npm install
@@ -49,19 +53,41 @@ npm install
 then run the commands below at the same time in two different terminals,
 
 
-> FIRST TERMINAL
+- __FIRST TERMINAL__
 ```
 npx expo start
 ```
->SECOND TERMINAL
+![npx expo start demo](image-2.png)
+
+- __SECOND TERMINAL__
 
 ```
 node server.js
 ```
+![node server.js demo](image-3.png)
 
->In the file _screens/VideoCallScreen.js_, edit the line 24 to the _IP address_ of your device.
+>In the file __screens/VideoCallScreen.js__, edit the line 24 to the _IP address_ of your device to enable _video/audio calling_.
 
+### Process of Video/Audio Calling 
+- The caller shoud press __Start Call__ and the __Green Button__ to start a call to the recipient.
+- Other recipient should also press __Start Call__ after the caller shows up in the recipient's call.
+- The caller should __press again the green button__ in order to start video calling.
 
+## TO BUILD APKs AND DEVELOPMENT BUILDS USING EAS
+Create an expo dev account [here](http://expo.dev/).
 
+After creating an account, follow the instructions given in this [documentation](https://docs.expo.dev/build/setup/) for setting up eas.
 
+__BUILD AN APK__
+> To build an apk using eas, follow this [documentation](https://docs.expo.dev/build-reference/apk/).
 
+_Screenshot of Successful APK Build using EAS._
+
+![Screenshot of Successful APK Build using EAS](image.png)
+
+__BUILD AN EXPO DEVELOPMENT BUILD__
+> To build an expo development build using eas, follow this [documentation](https://docs.expo.dev/develop/development-builds/create-a-build/).
+
+_Screenshot of Successful Expo Development Build using EAS._
+
+![Screenshot of Successful Expo Development Build using EAS](image-1.png)
