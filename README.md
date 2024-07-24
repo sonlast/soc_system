@@ -57,14 +57,14 @@ then run the commands below at the same time in two different terminals,
 ```
 npx expo start
 ```
-![npx expo start demo](image-2.png)
+![npx expo start demo](assets/image-2.png)
 
 - __SECOND TERMINAL__
 
 ```
 node server.js
 ```
-![node server.js demo](image-3.png)
+![node server.js demo](assets/image-3.png)
 
 >In the file __screens/VideoCallScreen.js__, edit the line 24 to the _IP address_ of your device to enable _video/audio calling_.
 
@@ -83,11 +83,11 @@ __BUILD AN APK__
 
 _Screenshot of Successful APK Build using EAS._
 
-![Screenshot of Successful APK Build using EAS](image.png)
+![Screenshot of Successful APK Build using EAS](assets/image.png)
 
 __BUILD AN EXPO DEVELOPMENT BUILD__
 > To build an expo development build using eas, follow this [documentation](https://docs.expo.dev/develop/development-builds/create-a-build/).
 
 _Screenshot of Successful Expo Development Build using EAS._
 
-![Screenshot of Successful Expo Development Build using EAS](image-1.png)
+![Screenshot of Successful Expo Development Build using EAS](assets/image-1.png)
