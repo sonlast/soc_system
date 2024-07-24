@@ -44,7 +44,7 @@
 [SIGN UP FOR AN EXPO DEV ACCOUNT HERE](http://expo.dev/)
 
 ## USAGE
-After downloading this github repository, run the command below in the terminal of the folder's root directory. This command installs all the dependencies for the mobile application.
+After downloading this github repository or obtaining the codes, run the command below in the terminal of the folder's root directory. This command installs all the dependencies for the mobile application.
 
 ```
 npm install
