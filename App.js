@@ -130,3 +130,5 @@ export default function App() {
     //* Authentication (Login, Registration) 
     //* Firestore (Database)
     //* Storage (Files)
+//* Render
+    //* Server Deployment
