@@ -16,7 +16,7 @@ const AudioCallScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const initializeSocket = () => {
-      const socket = io('http://192.168.55.101:3000'); // Replace with your signaling server URL
+      const socket = io('https://soc-system.onrender.com'); // Replace with your signaling server URL
       socketRef.current = socket;
 
       socket.on('connect', () => {

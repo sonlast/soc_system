@@ -74,40 +74,6 @@ const ChatScreen = () => {
     fetchKeys();
   }, []);
 
-  // const encryptMessage = async (message, publicKey) => {
-  //   try {
-  //     console.log('Text to encrypt:', message);
-  //     console.log('Public key:', publicKey);
-      // const encryptedMessage = await RSA.encrypt(message, publicKey);
-  //     console.log('Encrypted text:', encryptedMessage);
-  //     return encryptedMessage;
-  //   } catch (error) {
-  //     console.error('Error encrypting text:', error.message);
-  //     throw error;
-  //   }
-  // };
-
-  // const decryptMessage = async (encryptedMessage, privateKey) => {
-  //   try {
-  //     console.log('Encrypted text:', encryptedMessage);
-  //     console.log('Private key:', privateKey);
-
-  //     try {
-  //       atob(encryptedMessage);
-  //       console.log('Encrypted message is a valid base64 string');
-  //     } catch (error) {
-  //       throw new Error('Encrypted message is not a valid base64 string');
-  //     }
-
-  //     const decryptedMessage = await RSA.decrypt(encryptedMessage, privateKey);
-  //     console.log('Decrypted text:', decryptedMessage);
-  //     return decryptedMessage;
-  //   } catch (error) {
-  //     console.error('Error decrypting text:', error.message);
-  //     throw error;
-  //   }
-  // };
-
   useEffect(() => {
     const activateScreenCapture = async () => {
       await ScreenCapture.preventScreenCaptureAsync();
@@ -153,37 +119,21 @@ const ChatScreen = () => {
         const messagesFirestore = await Promise.all(snapshot.docs.map(async (doc) => {
           const data = doc.data();
 
-          // let decryptedText = '';
-          // if (data.text) {
-          //   try {
-          //     const buffer = Buffer.from(data.text, 'base64');
-          //     console.log('Encrypted text:', data.text);
-          //     console.log('Private key:', privateKey);
-          //     // decryptedText = crypto.privateDecrypt(privateKey, buffer).toString('utf8'); //! LOGS STOP HERE
-          //     decryptedText = buffer.toString('utf8');
-          //     console.log('Decrypted text:', decryptedText);
-          //     console.log('Decryption successful');
-          //   } catch (error) {
-          //     console.error('Error decrypting text:', error.message);
-          //     console.error('Decryption failed')
-          //   }
-          // }
-
           let decryptedText = '';
           if (data.text && data.aesKey) {
             // try {
               if (data.user._id !== auth.currentUser.uid) {
-                const decryptedAesKeyBase64 = await RSA.decrypt(data.aesKey, privateKey);
-                console.log('Decrypted AES key:', decryptedAesKeyBase64);
-                const decryptedAesKey = Buffer.from(decryptedAesKeyBase64, 'base64').toString('hex');
-                console.log('Decrypted AES key buffer:', decryptedAesKey);
-                const decryptedTextBytes = CryptoJS.AES.decrypt(data.text, decryptedAesKey);
-                console.log('Decrypted text bytes:', decryptedTextBytes);
-                decryptedText = decryptedTextBytes.toString(CryptoJS.enc.Utf8);
+                const decryptedAesKeyBase64 = await RSA.decrypt(data.aesKey, privateKey); //! Decrypt AES key
+                console.log('Decrypted AES key:', decryptedAesKeyBase64); 
+                const decryptedAesKey = Buffer.from(decryptedAesKeyBase64, 'base64').toString('hex'); //!  Convert decrypted AES key to buffer 
+                console.log('Decrypted AES key buffer:', decryptedAesKey); 
+                const decryptedTextBytes = CryptoJS.AES.decrypt(data.text, decryptedAesKey); //! Decrypt text using decrypted AES key
+                console.log('Decrypted text bytes:', decryptedTextBytes); 
+                decryptedText = decryptedTextBytes.toString(CryptoJS.enc.Utf8); //! Convert decrypted text to string
                 console.log('Decrypted text:', decryptedText);
                 console.log('Decryption successful');
               } else {
-                decryptedText = Buffer.from(data._sender, 'base64').toString('utf8');
+                decryptedText = Buffer.from(data._sender, 'base64').toString('utf8'); //! Convert decrypted AES key to buffer 
               }
             // } catch (error) {
             //   console.error('Error decrypting text:', error.message);
@@ -192,7 +142,7 @@ const ChatScreen = () => {
 
           return {
             _id: doc.id,
-            text: decryptedText,
+            text: decryptedText, //! Decrypted text
             // text: data.text,
             createdAt: data.createdAt.toDate(),
             user: {
@@ -252,41 +202,25 @@ const ChatScreen = () => {
     }
 
     try {
-
-      // let encryptedText = '';
-      // if (text) {
-      //   try {
-      //     const buffer = Buffer.from(text, 'utf8');
-      //     console.log('Text to encrypt:', text);
-      //     console.log('Public key:', publicKey);
-      //     // encryptedText = crypto.publicEncrypt(publicKey, buffer).toString('base64'); //! COMMENTED JUST FOR COMPATIBILITY TO THE UNSUCCESSFUL DECRYPTION IN LINE 120
-      //     encryptedText = buffer.toString('base64');
-      //     console.log('Encrypted text:', encryptedText)
-      //     console.log('Encryption successful');
-      //   } catch (error) {
-      //     console.error('Error encrypting text:', error.message);
-      //     console.error('Encryption failed');
-      //   }
-      // };
-      const aesKey = CryptoJS.lib.WordArray.random(16).toString();
-      console.log('AES key:', aesKey);
+      const aesKey = CryptoJS.lib.WordArray.random(16).toString(); //! Generate random AES key
+      console.log('AES key:', aesKey); 
 
       let encryptedText = '';
       if (text) {
-        encryptedText = CryptoJS.AES.encrypt(text, aesKey).toString();
-        console.log('Encrypted text:', encryptedText);
+        encryptedText = CryptoJS.AES.encrypt(text, aesKey).toString(); //! Encrypt text using AES key
+        console.log('Encrypted text:', encryptedText); 
       }
 
-      const aeseKeyBuffer = Buffer.from(aesKey, 'hex');
+      const aeseKeyBuffer = Buffer.from(aesKey, 'hex'); //! Convert AES key to buffer
       console.log('AES key buffer:', aeseKeyBuffer);
-      const encryptedAesKey = await RSA.encrypt(aeseKeyBuffer.toString('base64'), publicKey);
+      const encryptedAesKey = await RSA.encrypt(aeseKeyBuffer.toString('base64'), publicKey); //! Encrypt AES key using RSA public key
       console.log('Encrypted AES key:', encryptedAesKey);
 
       const messageData = {
         _id,
         createdAt: new Date(),
-        text: fileURL ? '' : encryptedText,
-        aesKey: encryptedAesKey,
+        text: fileURL ? '' : encryptedText, //! Encrypted text
+        aesKey: encryptedAesKey, //! Encrypted AES key
         user: {
           _id: sender._id,
           name: sender._id === auth.currentUser.uid ? username : user.username,
