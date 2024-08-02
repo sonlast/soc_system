@@ -21,7 +21,8 @@ const VideoCallScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const initializeSocket = () => {
-      const socket = io('https://soc-system.onrender.com'); // Replace with your signaling server URL
+      // const socket = io('https://soc-system.onrender.com'); // Replace with your signaling server URL
+      const socket = io('https://soc-system-rxo4.onrender.com');
       socketRef.current = socket;
 
       socket.on('connect', () => {
@@ -166,6 +167,10 @@ const VideoCallScreen = ({ route, navigation }) => {
     if (remoteStream) {
       remoteStream.getTracks().forEach(track => track.stop());
       setRemoteStream(null);
+    }
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      setIsConnected(false);
     }
     setCallStarted(false);
   };
