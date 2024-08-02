@@ -16,7 +16,6 @@ const AudioCallScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const initializeSocket = () => {
-      // const socket = io('https://soc-system.onrender.com'); // Replace with your signaling server URL
       const socket = io('https://soc-system-rxo4.onrender.com');
       socketRef.current = socket;
 

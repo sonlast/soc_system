@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import { app } from '../firebaseConfig';
 import { getFirestore, addDoc, collection } from 'firebase/firestore';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPhoneSlash, faPhone, faMicrophone, faMicrophoneSlash, faVideo, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
+import { faPhoneSlash, faPhone, faSync, faMicrophone, faMicrophoneSlash, faVideo, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
 
 const VideoCallScreen = ({ route, navigation }) => {
   const { user, profilePicture } = route.params;
@@ -14,6 +14,7 @@ const VideoCallScreen = ({ route, navigation }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [callStarted, setCallStarted] = useState(false);
   const [isMicOn, setIsMicOn] = useState(true);
+  const [isUsingFrontCamera, setIsUsingFrontCamera] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const socketRef = useRef(null);
   const pcRef = useRef(null);
@@ -21,7 +22,6 @@ const VideoCallScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const initializeSocket = () => {
-      // const socket = io('https://soc-system.onrender.com'); // Replace with your signaling server URL
       const socket = io('https://soc-system-rxo4.onrender.com');
       socketRef.current = socket;
 
@@ -68,7 +68,10 @@ const VideoCallScreen = ({ route, navigation }) => {
       });
 
       return () => {
-        socket.disconnect();
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+          socketRef.current = null;
+        }
         if (pcRef.current) {
           pcRef.current.close();
           pcRef.current = null;
@@ -110,7 +113,9 @@ const VideoCallScreen = ({ route, navigation }) => {
     try {
       const stream = await mediaDevices.getUserMedia({
         audio: true,
-        video: true,
+        video: {
+          facingMode: isUsingFrontCamera ? 'user' : 'environment',
+        },
       });
       setLocalStream(stream);
       if (!pcRef.current) {
@@ -170,6 +175,7 @@ const VideoCallScreen = ({ route, navigation }) => {
     }
     if (socketRef.current) {
       socketRef.current.disconnect();
+      socketRef.current = null; 
       setIsConnected(false);
     }
     setCallStarted(false);
@@ -184,12 +190,42 @@ const VideoCallScreen = ({ route, navigation }) => {
     }
   };
 
-  const toggleCamera = () => {
+  const toggleCameraOnOff = () => {
     if (localStream) {
       localStream.getVideoTracks().forEach(track => {
         track.enabled = !track.enabled;
         setIsCameraOn(track.enabled);
       });
+    }
+  };
+
+  const switchCamera = async () => {
+    setIsUsingFrontCamera(prevState => !prevState);
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
+
+    try {
+      const stream = await mediaDevices.getUserMedia({
+        audio: true,
+        video: {
+          facingMode: isUsingFrontCamera ? 'user' : 'environment',
+        },
+      }); 
+      setLocalStream(stream);
+
+      if (pcRef.current) {
+        const videoTrack = stream.getVideoTracks()[0];
+        const sender = pcRef.current.getSenders().find(s => s.track.kind === 'video');
+        if (sender) {
+          sender.replaceTrack(videoTrack);
+        } else {
+          pcRef.current.addTrack(videoTrack, stream);
+        }
+      }
+    } catch (error) {
+      console.error('Error switching camera:', error);
     }
   };
 
@@ -241,6 +277,7 @@ const VideoCallScreen = ({ route, navigation }) => {
             <Pressable style={{
               ...styles.button,
               backgroundColor: isMicOn ? '#fff' : '#f44336',
+              marginRight: 20,
             }}
               onPress={toggleMicrophone}
             >
@@ -249,22 +286,31 @@ const VideoCallScreen = ({ route, navigation }) => {
             <Pressable style={{
               ...styles.button,
               backgroundColor: '#fff',
+              marginRight: 20,
             }} onPress={createOffer}>
               <FontAwesomeIcon icon={faPhone} size={35} color="#00ff66" />
             </Pressable>
             <Pressable style={{
               ...styles.button,
               backgroundColor: '#fff',
+              marginRight: 20,
             }} onPress={endCall}>
               <FontAwesomeIcon icon={faPhoneSlash} size={35} color="#f44336" />
             </Pressable>
             <Pressable style={{
               ...styles.button,
               backgroundColor: isCameraOn ? '#fff' : '#f44336',
+              marginRight: 20,
             }}
-              onPress={toggleCamera}
+              onPress={toggleCameraOnOff}
             >
               <FontAwesomeIcon icon={isCameraOn ? faVideo : faVideoSlash} size={35} color={isCameraOn ? "#f44336" : "#fff"} />
+            </Pressable>
+            <Pressable style={{
+              ...styles.button,
+              backgroundColor: '#fff',
+            }} onPress={switchCamera}>
+              <FontAwesomeIcon icon={faSync} size={35} color="#f44336" />
             </Pressable>
           </>
         )}
