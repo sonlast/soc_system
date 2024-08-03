@@ -20,7 +20,6 @@ const VideoCallScreen = ({ route, navigation }) => {
   const pcRef = useRef(null);
   const firestore = getFirestore(app);
 
-  useEffect(() => {
     const initializeSocket = () => {
       const socket = io('https://soc-system-rxo4.onrender.com');
       socketRef.current = socket;
@@ -79,6 +78,7 @@ const VideoCallScreen = ({ route, navigation }) => {
       };
     };
 
+  useEffect(() => {
     initializeSocket();
   }, []);
 
@@ -88,7 +88,7 @@ const VideoCallScreen = ({ route, navigation }) => {
     });
 
     pc.onicecandidate = (event) => {
-      if (event.candidate) {
+      if (event.candidate && socketRef.current) {
         socketRef.current.emit('ice-candidate', event.candidate);
       }
     };
@@ -110,6 +110,10 @@ const VideoCallScreen = ({ route, navigation }) => {
   };
 
   const startLocalStream = async () => {
+    if (!socketRef.current) {
+      initializeSocket();
+    }
+
     try {
       const stream = await mediaDevices.getUserMedia({
         audio: true,
@@ -148,6 +152,11 @@ const VideoCallScreen = ({ route, navigation }) => {
   const createOffer = async () => {
     if (!pcRef.current || pcRef.current.connectionState === 'closed') {
       console.warn('Peer connection is not available or closed');
+      return;
+    }
+
+    if (!socketRef.current) {
+      console.warn('Socket connection is not available');
       return;
     }
 
