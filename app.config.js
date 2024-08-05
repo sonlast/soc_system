@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 export default {
   "expo": {
-    "name": "SOC",
+    "name": "Safe on Chat",
     "slug": "SOC",
     "version": "1.0.0",
     "orientation": "portrait",
