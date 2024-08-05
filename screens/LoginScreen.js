@@ -111,8 +111,15 @@ const LoginScreen = () => {
         >
           <Image
             style={styles.logo}
-            source={require('../assets/soclogo.png')}
+            source={require('../assets/soc.png')}
           />
+          <Text style={{
+            marginTop: 10,
+            fontFamily: 'TitilliumWeb_600SemiBold',
+            fontSize: 30,
+            alignSelf: 'center',
+            color: '#fff',
+          }}>Safe on Chat</Text>
           <TextInput
             placeholderTextColor={'rgb(200, 200, 200)'}
             placeholder='Email'
@@ -194,9 +201,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   logo: {
-    marginTop: 85,
-    width: 250,
-    height: 250,
+    marginTop: 120,
+    width: 100,
+    height: 100,
+    backgroundColor: '#fff',
+    borderRadius: 20,
     alignSelf: 'center'
   },
   loginbutton: {

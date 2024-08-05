@@ -28,7 +28,7 @@ const RegisterScreen = () => {
   const [loading, setLoading] = useState(false);
   const imageProps = useImage() || {};
   const image = imageProps.image || null;
-  const setImage = imageProps.setImage || (() => {});
+  const setImage = imageProps.setImage || (() => { });
   const auth = getAuth(app);
   const firestore = getFirestore(app);
   const storage = getStorage(app);
@@ -89,7 +89,7 @@ const RegisterScreen = () => {
       setError('Username is required');
       return;
     }
-    
+
     if (!password || !confirmPassword) {
       setError('Fill in the required fields.');
       setMatched('');
@@ -104,7 +104,7 @@ const RegisterScreen = () => {
       setError('');
       setMatched('Passwords matched');
     }
-    
+
     const passwordErrors = validatePassword(password);
     if (passwordErrors.length > 0) {
       setError(passwordErrors.join("\n"));
@@ -116,7 +116,7 @@ const RegisterScreen = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
+
       let imageUrl = '';
       if (image) {
         const response = await fetch(image);
@@ -125,7 +125,7 @@ const RegisterScreen = () => {
         await uploadBytes(storageRef, blob);
         imageUrl = await getDownloadURL(storageRef);
       }
-      
+
       const publicKey = await generateKeyPair();
 
       const userDoc = doc(firestore, "users", user.uid);
@@ -136,7 +136,7 @@ const RegisterScreen = () => {
         profilePicture: imageUrl,
         publicKey: publicKey,
       });
-      
+
       setAuthError("Account created successfully!");
       setTimeout(() => {
         navigation.navigate("SignUpAuth");
@@ -222,16 +222,24 @@ const RegisterScreen = () => {
         >
           <Image
             style={styles.logo}
-            source={require('../assets/soclogo.png')}
+            source={require('../assets/soc.png')}
           />
+          <Text style={{
+            fontFamily: 'TitilliumWeb_600SemiBold',
+            fontSize: 30,
+            alignSelf: 'center',
+            color: '#fff',
+            marginTop: 10,
+            marginBottom: 30,
+          }}>Safe on Chat</Text>
           <TouchableOpacity onPress={pickImage}>
             {!image && (
-              <View 
-              style={{ 
-                flexDirection: "column", 
-                alignItems: "center" 
+              <View
+                style={{
+                  flexDirection: "column",
+                  alignItems: "center"
                 }}
-                >
+              >
                 <MaterialCommunityIcons
                   name="upload"
                   size={24}
@@ -253,7 +261,7 @@ const RegisterScreen = () => {
               <Image
                 source={{ uri: image }}
                 style={{
-                  marginBottom: 40, 
+                  marginBottom: 40,
                   width: 75,
                   height: 75,
                   borderRadius: 50,
@@ -370,8 +378,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   logo: {
-    width: 250,
-    height: 250,
+    width: 100,
+    height: 100,
+    backgroundColor: '#fff',
+    borderRadius: 25,
     alignSelf: 'center',
   },
   signupbutton: {
@@ -402,7 +412,7 @@ const styles = StyleSheet.create({
 export default function AppWrapper() {
   return (
     <ImageProvider>
-      <RegisterScreen/>
+      <RegisterScreen />
     </ImageProvider>
   )
 };

@@ -1,6 +1,6 @@
 // Loading.js
 import React, { useEffect } from "react";
-import { Image, View, ActivityIndicator } from "react-native";
+import { Image, View, Text, ActivityIndicator } from "react-native";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -42,12 +42,22 @@ const Loading = () => {
         <Image
           style={{
             marginTop: 150,
-            width: 250,
-            height: 250,
+            width: 150,
+            height: 150,
+            backgroundColor: '#fff',
+            borderRadius: 30,
             alignSelf: 'center',
           }}
-          source={require('../assets/soclogo.png')}
+          source={require('../assets/soc.png')}
         />
+        <Text style={{
+          fontFamily: 'TitilliumWeb_600SemiBold',
+          fontSize: 40,
+          alignSelf: 'center',
+          color: '#fff',
+          marginTop: 10,
+          marginBottom: 30,
+        }}>Safe on Chat</Text>
         <ActivityIndicator size="large" color={"#FFFFFF"} />
       </LinearGradient>
     </View>

@@ -34,8 +34,15 @@ const Landingpage = () => {
       >
         <Image
           style={styles.logo}
-          source={require('../assets/soclogo.png')}
+          source={require('../assets/soc.png')}
         />
+        <Text style={{
+          fontFamily: 'TitilliumWeb_600SemiBold',
+          fontSize: 40,
+          alignSelf: 'center',
+          color: '#fff',
+          marginBottom: 30,
+        }}>Safe on Chat</Text>
         <Pressable
           onPress={pressLogin}
           style={({ pressed }) => [
@@ -71,9 +78,12 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   logo: {
-    marginTop: 125,
-    width: 300,
-    height: 300,
+    marginTop: 175,
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    width: 150,
+    height: 150,
     alignSelf: 'center',
   },
   loginbutton: {
