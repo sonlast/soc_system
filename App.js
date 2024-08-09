@@ -124,7 +124,7 @@ export default function App() {
 //* Video Call 
 //* Audio Call
 //* Expo Services
-    //* Development Build (Customized Expo Go)
+    //* Development Build (Customized Expo Go / Expo Development Build)
     //* Production Build (APK)
 //* Firebase Services 
     //* Authentication (Login, Registration) 
@@ -132,3 +132,23 @@ export default function App() {
     //* Storage (Files)
 //* Render
     //* Server Deployment
+
+//! SYSTEM FLOW
+//* Login / Registration
+//* Set up PIN / Fingerprint
+
+//* Chats List
+//* Search Chat (to Chat to Users)
+//* Chat Screen
+//* Send Message
+//* Send Attachment
+//* Typing Indicator
+//* Video Call / Audio Call
+
+//* Calls List
+
+//* Group Chats List
+//* Create Group Chat
+//* Group Chat Screen
+
+//* Log Out

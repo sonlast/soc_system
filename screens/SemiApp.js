@@ -120,19 +120,19 @@ const CallsScreen = () => {
   );
 };
 
-const Settings = () => {
-  return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={['#4c669f', '#f0ceff']}
-        style={styles.linearGradient}
-        start={[0.5, 0.5]}
-      >
-        <SettingsScreen />
-      </LinearGradient>
-    </View>
-  );
-};
+// const Settings = () => {
+//   return (
+//     <View style={styles.container}>
+//       <LinearGradient
+//         colors={['#4c669f', '#f0ceff']}
+//         style={styles.linearGradient}
+//         start={[0.5, 0.5]}
+//       >
+//         <SettingsScreen />
+//       </LinearGradient>
+//     </View>
+//   );
+// };
 
 const TabNavigator = () => {
   let [fontsLoaded, fontError] = useFonts({

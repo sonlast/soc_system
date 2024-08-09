@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as LocalAuthentication from 'expo-local-authentication';
-import ReactNativePinView from 'react-native-pin-view';
+import * as LocalAuthentication from 'expo-local-authentication'; //! This is a built-in Expo module for biometric authentication
+import ReactNativePinView from 'react-native-pin-view'; //! This is a custom component that I created to handle the PIN view
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faUnlock, faDeleteLeft, faFingerprint } from '@fortawesome/free-solid-svg-icons';
